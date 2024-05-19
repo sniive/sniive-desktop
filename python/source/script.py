@@ -1,14 +1,16 @@
 import time
 import sys
 from pynput import mouse, keyboard
-from threading import Thread, Lock
+from threading import Lock
 
 mutex: Lock = Lock()
 
 def output_json(json_string: str):
-    with mutex:
-        sys.stdout.write(json_string)
-        sys.stdout.flush()
+    mutex.acquire()
+    sys.stdout.write(json_string)
+    sys.stdout.write("\n")
+    sys.stdout.flush()
+    mutex.release()
 
 def on_press(key):
     try:
@@ -37,14 +39,6 @@ def on_scroll(x, y, dx, dy):
     json_string = f"""{{"action":"scrolled", "vertical_direction":{dy}, "horizontal_direction":{dx}, "x":{x}, "y":{y}, "time":{time.time()}}}"""
     output_json(json_string)
 
-def check_input():
-    while True:
-        if sys.stdin.read(1) == 'q':
-            break
-
-    with mutex:
-        sys.stdout.flush()
-
     
 
 
@@ -57,15 +51,11 @@ def start_recording():
             on_click=on_click,
             on_scroll=on_scroll)
     
-    input_thread = Thread(target=check_input)
 
     keyboard_listener.start()
     mouse_listener.start()
-    input_thread.start()
-
-
-    input_thread.join()
-    sys.exit(0)
+    keyboard_listener.join()
+    mouse_listener.join()
 
 
 if __name__ == "__main__":

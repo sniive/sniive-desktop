@@ -13,7 +13,11 @@ const api: any = {
   isLinux: () => /linux/.test(process.platform),
   getScreenAccess: () => ipcRenderer.invoke('getScreenAccess'),
   scriptStart: () => ipcRenderer.invoke('scriptStart'),
-  scriptStop: () => ipcRenderer.invoke('scriptStop')
+  scriptStop: () => ipcRenderer.invoke('scriptStop'),
+
+  close: () => ipcRenderer.invoke('close'),
+  minimize: () => ipcRenderer.invoke('minimize'),
+  resize: (arg: { width: number; height: number }) => ipcRenderer.invoke('resize', arg)
 }
 
 // Use `contextBridge` APIs to expose Electron APIs to

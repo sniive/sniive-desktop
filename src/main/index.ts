@@ -16,14 +16,34 @@ import { ChildProcessWithoutNullStreams, spawn } from 'child_process'
 const IS_OSX = process.platform === 'darwin'
 let scriptSubprocess: ChildProcessWithoutNullStreams | null
 
+function killScriptSubprocess() {
+  if (scriptSubprocess) {
+    try {
+      scriptSubprocess.stdout.removeAllListeners()
+      scriptSubprocess.stderr.removeAllListeners()
+      const res = scriptSubprocess.kill('SIGTERM')
+      scriptSubprocess = null
+      return res
+    } catch (error) {
+      console.error(error)
+      return false
+    }
+  } else {
+    return true
+  }
+}
+
 function createWindow(): void {
   //const displays = screen.getAllDisplays();
 
   // Create the browser window.
   const mainWindow = new BrowserWindow({
-    width: 900,
-    height: 670,
+    width: 300,
+    height: 80,
+    frame: false,
+    transparent: true,
     show: false,
+    resizable: false,
     autoHideMenuBar: true,
     ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {
@@ -51,6 +71,11 @@ function createWindow(): void {
     } else {
       return true
     }
+  })
+
+  ipcMain.handle('resize', (_, arg: { width: number; height: number }) => {
+    const { width, height } = arg
+    mainWindow.setSize(Math.floor(width), Math.floor(height), true)
   })
 
   mainWindow.on('ready-to-show', () => {
@@ -129,23 +154,13 @@ app.whenReady().then(() => {
     return result
   })
 
-  ipcMain.handle('scriptStop', async () => {
-    if (scriptSubprocess) {
-      try {
-        scriptSubprocess.stdout.removeAllListeners()
-        scriptSubprocess.stderr.removeAllListeners()
-        scriptSubprocess.stdin.write('q\n')
-        const res = scriptSubprocess.kill()
-        scriptSubprocess = null
-        return res
-      } catch (error) {
-        console.error(error)
-        return false
-      }
-    } else {
-      return true
-    }
+  ipcMain.handle('scriptStop', killScriptSubprocess)
+
+  ipcMain.handle('close', () => {
+    killScriptSubprocess()
+    app.quit()
   })
+  ipcMain.handle('minimize', () => BrowserWindow.getFocusedWindow()?.minimize())
 
   createWindow()
 
@@ -156,16 +171,14 @@ app.whenReady().then(() => {
   })
 })
 
+app.on('before-quit', killScriptSubprocess)
+app.on('will-quit', killScriptSubprocess)
+
 // Quit when all windows are closed, except on macOS. There, it's common
 // for applications and their menu bar to stay active until the user quits
 // explicitly with Cmd + Q.
 app.on('window-all-closed', () => {
-  if (scriptSubprocess) {
-    scriptSubprocess.stdout.removeAllListeners()
-    scriptSubprocess.stderr.removeAllListeners()
-    scriptSubprocess.stdin.write('q\n')
-    scriptSubprocess.kill()
-  }
+  killScriptSubprocess()
 
   if (!IS_OSX) {
     app.quit()

@@ -1,52 +1,28 @@
-import { Button } from '@renderer/components/ui/button'
 import { DesktopCapturerSource } from 'electron'
-import { MicIcon, MicOff, PlayIcon, ScreenShareIcon, SquareIcon } from 'lucide-react'
-import { useRef, useState } from 'react'
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger
-} from '@renderer/components/ui/tooltip'
+import { useEffect, useMemo, useState } from 'react'
 import { ScriptAction } from './scriptTypes'
+import { CloseButton } from '@renderer/components/utilityBar/closeButton'
+import { MinimizeButton } from '@renderer/components/utilityBar/minimizeButton'
+import { DragButton } from '@renderer/components/utilityBar/dragButton'
+import { VideoInputSource } from '@renderer/components/videoInputSource'
+import { AudioInputSource } from '@renderer/components/audioInputSource'
+import { RecordButton } from '@renderer/components/recordButton'
+import { VideoPreview } from '@renderer/components/videoPreview'
+import { AudioPreview } from '@renderer/components/audioPreview'
 
 function App(): JSX.Element {
-  const videoRef = useRef<HTMLVideoElement>(null)
-
   const [audioInput, setAudioInput] = useState<MediaDeviceInfo | null>(null)
   const [videoInput, setVideoInput] = useState<DesktopCapturerSource | null>(null)
+  const [isRecording, setIsRecording] = useState<boolean>(false)
 
-  const [isRecording, setIsRecording] = useState(false)
+  const [audioStream, setAudioStream] = useState<MediaStream | null>(null)
+  const [videoStream, setVideoStream] = useState<MediaStream | null>(null)
+
+  const recordingDisabled = useMemo(() => videoStream === null, [videoStream])
 
   window.electron.ipcRenderer.on('scriptData', (_, data: ScriptAction) => {
     console.log(data)
   })
-
-  const startAudioStream = async (source: MediaDeviceInfo): Promise<MediaStream> =>
-    await navigator.mediaDevices.getUserMedia({
-      audio: {
-        deviceId: source.deviceId
-      },
-      video: false
-    })
-
-  const getAudioDevices = async (): Promise<void> => {
-    const audioInputs: MediaDeviceInfo[] = await navigator.mediaDevices
-      .enumerateDevices()
-      .then((devices) => devices.filter((device) => device.kind === 'audioinput'))
-      .catch(() => [])
-
-    const options = ['- None -', ...audioInputs.map(({ label }) => label || 'Unknown device')]
-
-    await window.electron.ipcRenderer.invoke('useMenu', options).then((result: number | null) => {
-      if (result === null) return
-      if (result === 0) setAudioInput(null)
-      else {
-        setAudioInput(audioInputs[result - 1])
-        startAudioStream(audioInputs[result - 1])
-      }
-    })
-  }
 
   const startVideoStream = async (source: DesktopCapturerSource): Promise<void> =>
     await navigator.mediaDevices
@@ -59,83 +35,79 @@ function App(): JSX.Element {
           }
         }
       } as MediaStreamConstraints)
-      .then((stream: MediaStream) => {
-        videoRef.current!.srcObject = stream
-        videoRef.current!.play()
+      .then((stream) => {
+        setVideoStream(stream)
+
+        // get stream dimensions
+        const { width, height } = stream.getVideoTracks()[0].getSettings()
+        window.electron.ipcRenderer.invoke('resize', {
+          width: 300,
+          height: 80 + (height ?? 0) * (300 / (width ?? 1))
+        })
       })
 
-  const getVideoDevices = async (): Promise<void> =>
-    window.electron.ipcRenderer.invoke('getScreenAccess').then(async (access: boolean) => {
-      if (!access) return
-      await window.electron.ipcRenderer
-        .invoke('getVideoRecordingSource', ['screen', 'window'])
-        .then((source: DesktopCapturerSource | null) => {
-          setVideoInput(source)
-          if (source) {
-            startVideoStream(source)
-          }
-        })
-    })
+  useEffect(() => {
+    if (videoInput) {
+      startVideoStream(videoInput)
+    } else {
+      setVideoStream(null)
+    }
+  }, [videoInput])
 
-  const startScript = async (): Promise<void> => {
-    setIsRecording(await window.electron.ipcRenderer.invoke('scriptStart'))
-  }
+  const startAudioStream = async (source: MediaDeviceInfo): Promise<void> =>
+    await navigator.mediaDevices
+      .getUserMedia({
+        audio: {
+          deviceId: source.deviceId
+        },
+        video: false
+      })
+      .then((stream) => setAudioStream(stream))
 
-  const stopScript = async (): Promise<void> => {
-    setIsRecording(!(await window.electron.ipcRenderer.invoke('scriptStop')))
-  }
+  useEffect(() => {
+    if (audioInput) {
+      startAudioStream(audioInput)
+    } else {
+      setAudioStream(null)
+    }
+  }, [audioInput])
 
   return (
-    <main className={'min-h-screen bg-background antialiased'}>
-      <TooltipProvider>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button variant="ghost" onClick={getVideoDevices}>
-              <ScreenShareIcon className="w-6 h-6" />
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>
-              {videoInput
-                ? videoInput.name
-                  ? videoInput.name
-                  : 'Unknown'
-                : 'No video source selected'}
-            </p>
-          </TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
+    <main className="min-w-screen bg-background antialiased rounded-lg flex flex-col items-center justify-center overflow-hidden">
+      <div className="w-full grid grid-cols-3 items-center justify-center">
+        <div className="flex flex-row items-center justify-start col-span-1">
+          <VideoInputSource
+            videoInput={videoInput}
+            setVideoInput={setVideoInput}
+            isDisabled={isRecording}
+          />
+          <AudioInputSource
+            audioInput={audioInput}
+            setAudioInput={setAudioInput}
+            isDisabled={isRecording}
+          />
+        </div>
 
-      <TooltipProvider>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button variant="ghost" onClick={getAudioDevices}>
-              {audioInput ? <MicIcon className="w-6 h-6" /> : <MicOff className="w-6 h-6" />}
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>
-              {audioInput
-                ? audioInput.label
-                  ? audioInput.label
-                  : 'Unknown'
-                : 'No audio source selected'}
-            </p>
-          </TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
+        <div className="flex flex-row items-center justify-center col-span-1">
+          <RecordButton
+            isRecording={isRecording}
+            setIsRecording={setIsRecording}
+            isDisabled={recordingDisabled}
+          />
+        </div>
 
-      {isRecording ? (
-        <Button variant="ghost" onClick={stopScript}>
-          <SquareIcon className="w-6 h-6" />
-        </Button>
-      ) : (
-        <Button variant="ghost" onClick={startScript}>
-          <PlayIcon className="w-6 h-6" />
-        </Button>
-      )}
-
-      <video className="w-96 h-72 border-2 border-black bg-black" ref={videoRef} />
+        <div className="flex flex-row items-center justify-end gap-2 col-span-1">
+          <CloseButton />
+          <MinimizeButton />
+          <DragButton />
+        </div>
+      </div>
+      <AudioPreview
+        audioStream={audioStream}
+        isRecording={isRecording}
+        isDisabled={recordingDisabled}
+      />
+      <VideoPreview videoStream={videoStream} isRecording={isRecording} />
     </main>
   )
 }
