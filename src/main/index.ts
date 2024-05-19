@@ -1,6 +1,7 @@
 import {
   app,
   shell,
+  screen,
   BrowserWindow,
   ipcMain,
   desktopCapturer,
@@ -34,7 +35,18 @@ function killScriptSubprocess() {
 }
 
 function createWindow(): void {
-  //const displays = screen.getAllDisplays();
+  // Get the display that the mouse is currently on
+  const { x, y } = screen.getCursorScreenPoint()
+  const currentDisplay = screen.getAllDisplays().find((display) => {
+    const { x: displayX, y: displayY, width, height } = display.bounds
+    return x >= displayX && x <= displayX + width && y >= displayY && y <= displayY + height
+  })
+  // spawn window on top right corner of the current display (with 5% margin)
+  const { width, height } = currentDisplay
+    ? currentDisplay.bounds
+    : screen.getPrimaryDisplay().bounds
+  const windowX = Math.floor(width * 0.95 - 300)
+  const windowY = Math.floor(height * 0.05)
 
   // Create the browser window.
   const mainWindow = new BrowserWindow({
@@ -44,6 +56,8 @@ function createWindow(): void {
     transparent: true,
     show: false,
     resizable: false,
+    x: windowX,
+    y: windowY,
     autoHideMenuBar: true,
     ...(process.platform === 'linux' ? { icon } : {}),
     webPreferences: {

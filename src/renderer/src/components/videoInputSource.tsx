@@ -11,25 +11,15 @@ import { DesktopCapturerSource } from 'electron'
 type VideoInputSourceProps = {
   isDisabled: boolean
   videoInput: DesktopCapturerSource | null
-  setVideoInput: (source: DesktopCapturerSource | null) => void
+  setVideo: () => void
 }
 
-export function VideoInputSource({ isDisabled, videoInput, setVideoInput }: VideoInputSourceProps) {
-  const getVideoDevices = async (): Promise<void> =>
-    window.electron.ipcRenderer.invoke('getScreenAccess').then(async (access: boolean) => {
-      if (!access) return
-      await window.electron.ipcRenderer
-        .invoke('getVideoRecordingSource', ['screen', 'window'])
-        .then((source: DesktopCapturerSource | null) => {
-          setVideoInput(source)
-        })
-    })
-
+export function VideoInputSource({ isDisabled, videoInput, setVideo }: VideoInputSourceProps) {
   return (
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger asChild>
-          <Button variant="ghost" onClick={getVideoDevices} disabled={isDisabled}>
+          <Button variant="ghost" onClick={setVideo} disabled={isDisabled}>
             <ScreenShareIcon className="w-6 h-6" />
           </Button>
         </TooltipTrigger>

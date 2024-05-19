@@ -1,27 +1,19 @@
-import { useCallback } from 'react'
 import { cn } from '@renderer/lib/utils'
 import { Button } from '@renderer/components/ui/button'
 
 type RecordButtonProps = {
   isDisabled: boolean
   isRecording: boolean
-  setIsRecording: (isRecording: boolean) => void
+  startRecording: () => void
+  stopRecording: () => void
 }
 
-export function RecordButton({ isDisabled, isRecording, setIsRecording }: RecordButtonProps) {
-  const startScript = async (): Promise<void> => {
-    setIsRecording(await window.electron.ipcRenderer.invoke('scriptStart'))
-  }
-
-  const stopScript = async (): Promise<void> => {
-    setIsRecording(!(await window.electron.ipcRenderer.invoke('scriptStop')))
-  }
-
-  const handleClick = useCallback(
-    async () => (isRecording ? stopScript() : startScript()),
-    [isRecording]
-  )
-
+export function RecordButton({
+  isDisabled,
+  isRecording,
+  startRecording,
+  stopRecording
+}: RecordButtonProps) {
   return (
     <Button
       variant="ghost"
@@ -32,7 +24,7 @@ export function RecordButton({ isDisabled, isRecording, setIsRecording }: Record
         isRecording &&
           'bg-red-500 hover:bg-red-600 outline-red-500 hover:outline-red-600 animate-pulse duration-700'
       )}
-      onClick={handleClick}
+      onClick={() => (isRecording ? stopRecording() : startRecording())}
       aria-label={isRecording ? 'Stop Recording' : 'Start Recording'}
       disabled={isDisabled}
     />

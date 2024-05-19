@@ -10,32 +10,15 @@ import {
 type AudioInputSourceProps = {
   isDisabled: boolean
   audioInput: MediaDeviceInfo | null
-  setAudioInput: (source: MediaDeviceInfo | null) => void
+  setAudio: () => void
 }
 
-export function AudioInputSource({ isDisabled, audioInput, setAudioInput }: AudioInputSourceProps) {
-  const getAudioDevices = async (): Promise<void> => {
-    const audioInputs: MediaDeviceInfo[] = await navigator.mediaDevices
-      .enumerateDevices()
-      .then((devices) => devices.filter((device) => device.kind === 'audioinput'))
-      .catch(() => [])
-
-    const options = ['- None -', ...audioInputs.map(({ label }) => label || 'Unknown device')]
-
-    await window.electron.ipcRenderer.invoke('useMenu', options).then((result: number | null) => {
-      if (result === null) return
-      if (result === 0) setAudioInput(null)
-      else {
-        setAudioInput(audioInputs[result - 1])
-      }
-    })
-  }
-
+export function AudioInputSource({ isDisabled, audioInput, setAudio }: AudioInputSourceProps) {
   return (
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger asChild>
-          <Button variant="ghost" onClick={getAudioDevices} disabled={isDisabled}>
+          <Button variant="ghost" onClick={setAudio} disabled={isDisabled}>
             {audioInput ? <MicIcon className="w-6 h-6" /> : <MicOff className="w-6 h-6" />}
           </Button>
         </TooltipTrigger>
