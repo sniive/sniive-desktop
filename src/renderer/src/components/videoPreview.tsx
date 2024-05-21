@@ -1,5 +1,5 @@
 import { cn } from '@renderer/lib/utils'
-import { useRef } from 'react'
+import { useEffect, useRef } from 'react'
 
 type VideoPreviewProps = {
   isRecording: boolean
@@ -9,15 +9,21 @@ type VideoPreviewProps = {
 export function VideoPreview({ isRecording, videoStream }: VideoPreviewProps) {
   const videoRef = useRef<HTMLVideoElement>(null)
 
-  if (videoStream) {
-    videoRef.current!.srcObject = videoStream
-  }
+  useEffect(() => {
+    if (videoRef.current) {
+      videoRef.current.onloadedmetadata = () => {
+        videoRef.current!.play()
+      }
+      if (videoStream) {
+        videoRef.current.srcObject = videoStream
+      }
+    }
+  }, [videoStream, videoRef.current])
 
   return (
     <video
       ref={videoRef}
       className={cn('w-full h-full', videoStream ? 'block' : 'hidden', isRecording && 'opacity-75')}
-      autoPlay
       playsInline
       muted
     />

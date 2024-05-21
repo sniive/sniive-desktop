@@ -7,15 +7,18 @@ import {
   desktopCapturer,
   Menu,
   systemPreferences,
-  DesktopCapturerSource
+  DesktopCapturerSource,
+  Tray,
+  nativeImage
 } from 'electron'
-import { join } from 'path'
-import { electronApp, optimizer, is } from '@electron-toolkit/utils'
-import icon from '../../resources/icon.png?asset'
+import path, { join } from 'path'
+import { electronApp, is } from '@electron-toolkit/utils'
+import appIcon from '../../resources/icon.png?asset&asarUnpack'
 import { ChildProcessWithoutNullStreams, spawn } from 'child_process'
 
 const IS_OSX = process.platform === 'darwin'
 let scriptSubprocess: ChildProcessWithoutNullStreams | null
+let deepLink: string | null = null
 
 function killScriptSubprocess() {
   if (scriptSubprocess) {
@@ -32,6 +35,15 @@ function killScriptSubprocess() {
   } else {
     return true
   }
+}
+
+// Register the protocol for sniive://
+if (process.defaultApp) {
+  if (process.argv.length >= 2) {
+    app.setAsDefaultProtocolClient('sniive', process.execPath, [path.resolve(process.argv[1])])
+  }
+} else {
+  app.setAsDefaultProtocolClient('sniive')
 }
 
 function createWindow(): void {
@@ -59,20 +71,51 @@ function createWindow(): void {
     x: windowX,
     y: windowY,
     autoHideMenuBar: true,
-    ...(process.platform === 'linux' ? { icon } : {}),
+    ...(process.platform === 'linux' ? { icon: nativeImage.createFromPath(appIcon) } : {}),
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
       sandbox: false
     }
   })
 
+  new Tray(nativeImage.createFromPath(appIcon))
+
+  app.on('second-instance', (_, commandLine: string[]) => {
+    // Someone tried to run a second instance, we should focus our window.
+    if (mainWindow) {
+      if (mainWindow.isMinimized()) mainWindow.restore()
+      mainWindow.focus()
+    }
+    // the commandLine is array of strings in which last element is deep link url
+    if (commandLine && commandLine.length >= 2 && !IS_OSX) {
+      deepLink = commandLine[commandLine.length - 1]
+    }
+  })
+
+  /* fetch of localhost:3000, include custom cookies
+  fetch('http://localhost:3000/api/auth/testAuth', {
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+      'Cookie': "authjs.session-token=eyJhbGciOiJkaXIiLCJlbmMiOiJBMjU2Q0JDLUhTNTEyIiwia2lkIjoic284N1hYQzl2WXc4d2l4SE4zb3lvNGR2d1FRbTc3MWFZN25tX05OS2IxeDFiMERqX3p5LTNFekR5VDdKeklXTlpEM2dtNHRMcXoyRjF4Y0w4WlUweFEifQ..LLiBbwG_erNRVCaRooBj2A.jVmfUuPduQf_UTTgQQ0wFZZYd-HaDjjiDXSS6zB3-_EavVA0XMjal5q_GVLZZt9pSZtW2hkxgavMcx18ImNfaqRh5PkuBJ2lICRQ0gdWwMtRYQOBGk97FhiU9rjg2IL1DSIInrffeV6dbsTKb7jhD38oLEqUqsbq3cTnbFxZM8nlos6LEpVMUm0Vz1q19_hDOuwjYJqynpGZYVo2WfVaUdYIeypZpF9oPDACr107VqLBH-6YU5DMTibIZ1E08meznfcyP6kT0k7ZXfWrUUT8-qcOa-13G_DE2Hq_ZsFwcXfYmfw1ybihO7GThCEdAOMr.ui1bxqP4iisxGAofP6Riq7nYglUTVK9xfKXWW4xpGag"
+    },
+  })
+    .then((res) => res.json())
+    .then((data) => console.log(data))
+    .catch((err) => console.error(err))
+  */
+
   // This API must have access to the `mainWindow` object
   ipcMain.handle('scriptStart', async () => {
     if (scriptSubprocess === null || scriptSubprocess === undefined) {
       try {
-        scriptSubprocess = spawn(__dirname + '/../../resources/script.bin')
+        const scriptPath = join(__dirname, '../../resources/script.bin').replace(
+          'app.asar',
+          'app.asar.unpacked'
+        )
+        scriptSubprocess = spawn(scriptPath)
         scriptSubprocess.stdout.on('data', (data) => {
-          mainWindow.webContents.send('scriptData', JSON.parse(data.toString()))
+          mainWindow.webContents.send('scriptData', data.toString())
         })
         scriptSubprocess.stderr.on('data', (data) => {
           console.error(data.toString())
@@ -113,91 +156,111 @@ function createWindow(): void {
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
-app.whenReady().then(() => {
-  // Set app user model id for windows
-  electronApp.setAppUserModelId('com.electron')
+const gotTheLock = app.requestSingleInstanceLock()
 
-  // Default open or close DevTools by F12 in development
-  // and ignore CommandOrControl + R in production.
-  // see https://github.com/alex8088/electron-toolkit/tree/master/packages/utils
-  app.on('browser-window-created', (_, window) => {
-    optimizer.watchWindowShortcuts(window)
-  })
+if (!gotTheLock) {
+  app.quit()
+} else {
+  app.whenReady().then(() => {
+    // Set app user model id for windows
+    electronApp.setAppUserModelId('com.electron')
 
-  // IPC test
-  ipcMain.on('ping', () => console.log('pong'))
+    app.on('browser-window-created', (_, window) => {
+      // lauch devtools for each BrowserWindow
+      window.webContents.openDevTools()
 
-  ipcMain.handle(
-    'getScreenAccess',
-    () => !IS_OSX || systemPreferences.getMediaAccessStatus('screen') === 'granted'
-  )
-
-  ipcMain.handle(
-    'getVideoRecordingSource',
-    async (_, types: Array<'window' | 'screen'>): Promise<DesktopCapturerSource | null> =>
-      await desktopCapturer
-        .getSources({ types, fetchWindowIcons: true })
-        .then((sources) => (sources.length > 0 ? sources[0] : null))
-        .catch(() => null)
-  )
-
-  ipcMain.handle('useMenu', async (_, template: string[]) => {
-    let result: any = null
-    let menuClosed = false
-
-    const templateWithClick = template.map((label, index) => ({
-      label,
-      click: (): void => {
-        result = index
-      }
-    }))
-
-    const menu = Menu.buildFromTemplate(templateWithClick)
-    menu.popup()
-
-    menu.on('menu-will-close', () => {
-      menuClosed = true
-      menu.closePopup()
+      //optimizer.watchWindowShortcuts(window)
     })
 
-    // Wait for the menu to be closed
-    while (!menuClosed) {
-      await new Promise((resolve) => setTimeout(resolve, 100))
+    // IPC test
+    ipcMain.on('ping', () => console.log('pong'))
+
+    ipcMain.handle(
+      'getScreenAccess',
+      () => !IS_OSX || systemPreferences.getMediaAccessStatus('screen') === 'granted'
+    )
+
+    ipcMain.handle(
+      'getVideoRecordingSource',
+      async (_, types: Array<'window' | 'screen'>): Promise<DesktopCapturerSource | null> =>
+        await desktopCapturer
+          .getSources({ types, fetchWindowIcons: true })
+          .then((sources) => (sources.length > 0 ? sources[0] : null))
+          .catch(() => null)
+    )
+
+    ipcMain.handle('useMenu', async (_, template: string[]) => {
+      let result: any = null
+      let menuClosed = false
+
+      const templateWithClick = template.map((label, index) => ({
+        label,
+        click: (): void => {
+          result = index
+        }
+      }))
+
+      const menu = Menu.buildFromTemplate(templateWithClick)
+      menu.popup()
+
+      menu.on('menu-will-close', () => {
+        menuClosed = true
+        menu.closePopup()
+      })
+
+      // Wait for the menu to be closed
+      while (!menuClosed) {
+        await new Promise((resolve) => setTimeout(resolve, 100))
+      }
+
+      return result
+    })
+
+    ipcMain.handle('scriptStop', killScriptSubprocess)
+
+    ipcMain.handle('close', () => {
+      killScriptSubprocess()
+      app.quit()
+    })
+
+    ipcMain.handle('minimize', () => BrowserWindow.getFocusedWindow()?.minimize())
+
+    ipcMain.handle('getLink', () => {
+      if (is.dev) return 'sniive://test?access=123'
+      return deepLink
+    })
+
+    createWindow()
+    if (process.argv.length >= 2 && !IS_OSX) {
+      deepLink = process.argv[1]
     }
 
-    return result
+    app.on('activate', function () {
+      // On macOS it's common to re-create a window in the app when the
+      // dock icon is clicked and there are no other windows open.
+      if (BrowserWindow.getAllWindows().length === 0) createWindow()
+    })
   })
 
-  ipcMain.handle('scriptStop', killScriptSubprocess)
+  app.on('before-quit', killScriptSubprocess)
+  app.on('will-quit', killScriptSubprocess)
 
-  ipcMain.handle('close', () => {
+  // Quit when all windows are closed, except on macOS. There, it's common
+  // for applications and their menu bar to stay active until the user quits
+  // explicitly with Cmd + Q.
+  app.on('window-all-closed', () => {
     killScriptSubprocess()
-    app.quit()
+
+    if (!IS_OSX) {
+      app.quit()
+    }
   })
-  ipcMain.handle('minimize', () => BrowserWindow.getFocusedWindow()?.minimize())
 
-  createWindow()
-
-  app.on('activate', function () {
-    // On macOS it's common to re-create a window in the app when the
-    // dock icon is clicked and there are no other windows open.
-    if (BrowserWindow.getAllWindows().length === 0) createWindow()
+  app.on('open-url', (_, url: string) => {
+    if (IS_OSX) {
+      deepLink = url
+    }
   })
-})
-
-app.on('before-quit', killScriptSubprocess)
-app.on('will-quit', killScriptSubprocess)
-
-// Quit when all windows are closed, except on macOS. There, it's common
-// for applications and their menu bar to stay active until the user quits
-// explicitly with Cmd + Q.
-app.on('window-all-closed', () => {
-  killScriptSubprocess()
-
-  if (!IS_OSX) {
-    app.quit()
-  }
-})
-
+}
 // In this file you can include the rest of your app"s specific main process
 // code. You can also put them in separate files and require them here.

@@ -14,6 +14,7 @@ const api: any = {
   getScreenAccess: () => ipcRenderer.invoke('getScreenAccess'),
   scriptStart: () => ipcRenderer.invoke('scriptStart'),
   scriptStop: () => ipcRenderer.invoke('scriptStop'),
+  getLink: () => ipcRenderer.invoke('getLink'),
 
   close: () => ipcRenderer.invoke('close'),
   minimize: () => ipcRenderer.invoke('minimize'),

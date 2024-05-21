@@ -1,5 +1,5 @@
-appId: com.electron.app
-productName: sniive-desktop
+appId: com.electron.sniive
+productName: sniive
 directories:
   buildResources: build
 files:
@@ -11,8 +11,10 @@ files:
   - '!{tsconfig.json,tsconfig.node.json,tsconfig.web.json}'
 asarUnpack:
   - resources/**
+extraFiles:
+  - build/*
 win:
-  executableName: sniive-desktop
+  executableName: sniive
 nsis:
   artifactName: ${name}-${version}-setup.${ext}
   shortcutName: ${productName}
@@ -21,10 +23,7 @@ nsis:
 mac:
   entitlementsInherit: build/entitlements.mac.plist
   extendInfo:
-    - NSCameraUsageDescription: Application requests access to the device's camera.
     - NSMicrophoneUsageDescription: Application requests access to the device's microphone.
-    - NSDocumentsFolderUsageDescription: Application requests access to the user's Documents folder.
-    - NSDownloadsFolderUsageDescription: Application requests access to the user's Downloads folder.
   notarize: false
 dmg:
   artifactName: ${name}-${version}.${ext}
@@ -33,11 +32,22 @@ linux:
     - AppImage
     - snap
     - deb
-  maintainer: electronjs.org
+  maintainer: Sniive
   category: Utility
+  desktop: 
+    Name: Sniive
+    Encoding: UTF-8
+    Comment: Sniive
+    Type: Application
+    MimeType: x-scheme-handler/sniive
+    Icon: /opt/sniive/build/icon.png
 appImage:
   artifactName: ${name}-${version}.${ext}
 npmRebuild: false
 publish:
   provider: generic
   url: https://example.com/auto-updates
+protocols:
+  name: sniive
+  schemes:
+    - sniive
