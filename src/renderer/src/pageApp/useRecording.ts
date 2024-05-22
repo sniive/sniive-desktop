@@ -66,7 +66,6 @@ export function useRecording({
       const regex = /sniive:\/\/(.+)\?access=(.+)/
       const match = link.match(regex)
       if (match && match.length === 3) {
-        console.log('setSendInfo', match[1], match[2])
         const spaceName = match[1]
         const accessCode = match[2]
         setSendInfo(spaceName, accessCode)
