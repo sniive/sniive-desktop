@@ -1,8 +1,9 @@
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 
 type UseAudioReturn = {
   audioInput: MediaDeviceInfo | null
   setAudio: () => void
+  stopAudio: () => void
   audioStream: MediaStream | null
   audioRecorder: MediaRecorder | null
 }
@@ -68,5 +69,11 @@ export function useAudio(): UseAudioReturn {
       }
     })
 
-  return { audioInput, setAudio, audioStream, audioRecorder }
+  const stopAudio = useCallback(async () => {
+    audioStream?.stop()
+
+    setAudioStream(null)
+  }, [audioStream])
+
+  return { audioInput, setAudio, stopAudio, audioStream, audioRecorder }
 }

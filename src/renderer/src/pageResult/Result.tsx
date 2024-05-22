@@ -6,7 +6,7 @@ import { MinimizeButton } from '@renderer/components/utilityBar/minimizeButton'
 import { useResult } from './useResult'
 
 function Result(): JSX.Element {
-  const { state, progress, handleConvert, handleUpload } = useResult()
+  const { state, progress, handleUpload } = useResult()
 
   return (
     <main className="min-w-screen bg-background antialiased rounded-lg flex flex-col items-center justify-center overflow-hidden pb-1">
@@ -23,12 +23,7 @@ function Result(): JSX.Element {
           <DragButton />
         </div>
       </div>
-      <ResultButton
-        state={state}
-        progress={progress}
-        handleConvert={handleConvert}
-        handleUpload={handleUpload}
-      />
+      <ResultButton state={state} progress={progress} handleUpload={handleUpload} />
     </main>
   )
 }

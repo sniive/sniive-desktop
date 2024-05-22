@@ -1,9 +1,10 @@
 import { DesktopCapturerSource } from 'electron'
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 
 type UseVideoReturn = {
   videoInput: DesktopCapturerSource | null
   setVideo: () => void
+  stopVideo: () => void
   videoStream: MediaStream | null
   imageCapture: ImageCapture | null
 }
@@ -60,5 +61,11 @@ export function useVideo(): UseVideoReturn {
       }
     })
 
-  return { videoInput, setVideo, videoStream, imageCapture }
+  const stopVideo = useCallback(async () => {
+    videoStream?.getTracks().forEach((track) => track.stop())
+    setVideoStream(null)
+    setImageCapture(null)
+  }, [videoStream])
+
+  return { videoInput, setVideo, stopVideo, videoStream, imageCapture }
 }

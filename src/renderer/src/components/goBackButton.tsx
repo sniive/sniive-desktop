@@ -5,16 +5,13 @@ import {
   TooltipProvider,
   TooltipTrigger
 } from '@renderer/components/ui/tooltip'
-import { useGlobalStore } from '@renderer/globalStore'
 import { Undo2Icon } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 
 export function GoBackButton() {
   const navigate = useNavigate()
-  const { clearMemory } = useGlobalStore(({ clearMemory }) => ({ clearMemory }))
 
   const handleClick = () => {
-    clearMemory()
     navigate(-1)
   }
 

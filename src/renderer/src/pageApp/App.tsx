@@ -12,11 +12,13 @@ import { useAudio } from './useAudio'
 import { useRecording } from './useRecording'
 
 function App(): JSX.Element {
-  const { videoInput, videoStream, imageCapture, setVideo } = useVideo()
-  const { audioInput, audioStream, audioRecorder, setAudio } = useAudio()
+  const { videoInput, videoStream, imageCapture, setVideo, stopVideo } = useVideo()
+  const { audioInput, audioStream, audioRecorder, setAudio, stopAudio } = useAudio()
   const { isRecording, recordingDisabled, startRecording, stopRecording } = useRecording({
     audioRecorder,
-    imageCapture
+    imageCapture,
+    stopAudio,
+    stopVideo
   })
 
   return (

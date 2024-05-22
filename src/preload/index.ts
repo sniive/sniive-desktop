@@ -1,11 +1,27 @@
 import { contextBridge, ipcRenderer } from 'electron'
 import { electronAPI } from '@electron-toolkit/preload'
 
+export enum BridgeFunctions {
+  'getVideoRecordingSources' = 'getVideoRecordingSources',
+  'useMenu' = 'useMenu',
+  'isOSX' = 'isOSX',
+  'isWindows' = 'isWindows',
+  'isLinux' = 'isLinux',
+  'getScreenAccess' = 'getScreenAccess',
+  'scriptStart' = 'scriptStart',
+  'scriptStop' = 'scriptStop',
+  'isAuth' = 'isAuth',
+  'close' = 'close',
+  'minimize' = 'minimize',
+  'resize' = 'resize',
+  'handleCapture' = 'handleCapture'
+}
+
 // Custom APIs for renderer
-const api: any = {
+// eslint-disable-next-line @typescript-eslint/ban-types
+const api: Record<BridgeFunctions, Function> = {
   getVideoRecordingSources: (types: Array<'window' | 'screen'>) =>
     ipcRenderer.invoke('getVideoRecordingSource', types),
-
   useMenu: (template: string[]) => ipcRenderer.invoke('useMenu', template),
 
   isOSX: () => process.platform === 'darwin',
@@ -14,11 +30,13 @@ const api: any = {
   getScreenAccess: () => ipcRenderer.invoke('getScreenAccess'),
   scriptStart: () => ipcRenderer.invoke('scriptStart'),
   scriptStop: () => ipcRenderer.invoke('scriptStop'),
-  getLink: () => ipcRenderer.invoke('getLink'),
+  isAuth: () => ipcRenderer.invoke('isAuth'),
 
   close: () => ipcRenderer.invoke('close'),
   minimize: () => ipcRenderer.invoke('minimize'),
-  resize: (arg: { width: number; height: number }) => ipcRenderer.invoke('resize', arg)
+  resize: (arg: { width: number; height: number }) => ipcRenderer.invoke('resize', arg),
+
+  handleCapture: (data: any) => ipcRenderer.invoke('handleCapture', data)
 }
 
 // Use `contextBridge` APIs to expose Electron APIs to
