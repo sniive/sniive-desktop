@@ -37,7 +37,7 @@ export function useVideo(): UseVideoReturn {
         const { width, height } = stream.getVideoTracks()[0].getSettings()
         window.electron.ipcRenderer.invoke('resize', {
           width: 300,
-          height: 80 + (height ?? 0) * (300 / (width ?? 1))
+          height: 90 + (height ?? 0) * (300 / (width ?? 1))
         })
       })
 

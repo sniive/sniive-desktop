@@ -2,11 +2,11 @@ import './assets/main.css'
 
 import React from 'react'
 import ReactDOM from 'react-dom/client'
-import { createBrowserRouter, RouterProvider } from 'react-router-dom'
+import { createHashRouter, RouterProvider } from 'react-router-dom'
 import App from '@renderer/pageApp/App'
 import Result from '@renderer/pageResult/Result'
 
-const router = createBrowserRouter([
+const router = createHashRouter([
   {
     path: '/',
     element: <App />

@@ -40,7 +40,7 @@ export function useRecording({
 
   const recordingDisabled = useMemo(() => imageCapture === null || !isAuth, [imageCapture, isAuth])
 
-  const startRecording = async () => {
+  const startRecording = useCallback(async () => {
     if (recordingDisabled) return
 
     if (await window.electron.ipcRenderer.invoke('scriptStart')) {
@@ -49,9 +49,9 @@ export function useRecording({
     }
 
     setIsRecording(false)
-  }
+  }, [audioRecorder, recordingDisabled])
 
-  const stopRecording = async () => {
+  const stopRecording = useCallback(async () => {
     if (recordingDisabled) return
 
     stopVideo()
@@ -62,7 +62,7 @@ export function useRecording({
     setIsRecording(false)
 
     navigate('/result')
-  }
+  }, [audioRecorder, recordingDisabled])
 
   const handleData = useCallback(
     async (_: IpcRendererEvent, data: string) => {

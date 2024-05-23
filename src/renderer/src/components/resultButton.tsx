@@ -16,7 +16,7 @@ export function ResultButton({ state, progress, handleUpload }: ResultButtonProp
   switch (state) {
     case ResultState.IDLE:
       return (
-        <Button variant="default" size="lg" onClick={handleUpload} className="p-0 h-8 w-32">
+        <Button variant="default" size="lg" onClick={handleUpload} className="p-0 h-8 w-32 my-0.5">
           <div className="relative w-full h-full">
             <div className="absolute top-0 left-0 z-20 flex items-center justify-center h-full w-full">
               Upload

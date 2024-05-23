@@ -1,3 +1,4 @@
+import { useGlobalStore } from '@renderer/globalStore'
 import { useCallback, useState } from 'react'
 
 type UseAudioReturn = {
@@ -14,6 +15,8 @@ export function useAudio(): UseAudioReturn {
   const [audioRecorder, setAudioRecorder] = useState<MediaRecorder | null>(null)
   const [audioChunks, setAudioChunks] = useState<Blob[]>([])
 
+  const { setAudioBlob } = useGlobalStore(({ setAudioBlob }) => ({ setAudioBlob }))
+
   const startRecorder = async (stream: MediaStream): Promise<void> => {
     const recorder = new MediaRecorder(stream, { mimeType: 'audio/webm' })
     recorder.ondataavailable = (event) => {
@@ -21,9 +24,13 @@ export function useAudio(): UseAudioReturn {
     }
     recorder.onstop = () => {
       const blob = new Blob(audioChunks, { type: 'audio/webm' })
-      const url = URL.createObjectURL(blob)
-      console.log(url)
-      setAudioChunks([])
+      // convert blob to base64
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        const base64data = reader.result
+        setAudioBlob(base64data as string)
+      }
+      reader.readAsDataURL(blob)
     }
     setAudioRecorder(recorder)
   }
@@ -70,8 +77,7 @@ export function useAudio(): UseAudioReturn {
     })
 
   const stopAudio = useCallback(async () => {
-    audioStream?.stop()
-
+    audioStream?.getTracks().forEach((track) => track.stop())
     setAudioStream(null)
   }, [audioStream])
 

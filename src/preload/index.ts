@@ -14,7 +14,8 @@ export enum BridgeFunctions {
   'close' = 'close',
   'minimize' = 'minimize',
   'resize' = 'resize',
-  'handleCapture' = 'handleCapture'
+  'handleCapture' = 'handleCapture',
+  'handleAudio' = 'handleAudio'
 }
 
 // Custom APIs for renderer
@@ -36,7 +37,8 @@ const api: Record<BridgeFunctions, Function> = {
   minimize: () => ipcRenderer.invoke('minimize'),
   resize: (arg: { width: number; height: number }) => ipcRenderer.invoke('resize', arg),
 
-  handleCapture: (data: any) => ipcRenderer.invoke('handleCapture', data)
+  handleCapture: (data: any) => ipcRenderer.invoke('handleCapture', data),
+  handleAudio: (audioBlob: Blob) => ipcRenderer.invoke('handleAudio', audioBlob)
 }
 
 // Use `contextBridge` APIs to expose Electron APIs to

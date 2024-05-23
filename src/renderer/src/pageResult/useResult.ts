@@ -1,5 +1,6 @@
 import { useGlobalStore } from '@renderer/globalStore'
-import { useCallback, useState } from 'react'
+import { IpcRendererEvent } from 'electron'
+import { useCallback, useEffect, useState } from 'react'
 
 enum ResultState {
   IDLE,
@@ -14,22 +15,28 @@ type UseResultReturn = {
 }
 
 export function useResult(): UseResultReturn {
-  const { isAuth } = useGlobalStore(({ isAuth }) => ({ isAuth }))
+  const { audioBlob } = useGlobalStore(({ audioBlob }) => ({ audioBlob }))
 
   const [state, setState] = useState<ResultState>(ResultState.IDLE)
   const [progress, setProgress] = useState<number>(0)
 
+  useEffect(() => {
+    window.electron.ipcRenderer.invoke('resize', {
+      width: 300,
+      height: 80
+    })
+  }, [])
+
+  window.electron.ipcRenderer.on('uploadProgress', (_: IpcRendererEvent, progress: number) => {
+    setProgress(progress)
+  })
+
   const handleUpload = useCallback(async () => {
     setState(ResultState.UPLOADING)
-
-    // Simulate upload
-    for (let i = 0; i < 100; i++) {
-      await new Promise((resolve) => setTimeout(resolve, 100))
-      setProgress(i)
-    }
-
-    setState(ResultState.UPLOADING_DONE)
-  }, [isAuth])
+    await window.electron.ipcRenderer.invoke('handleAudio', audioBlob).then((result: boolean) => {
+      setState(result ? ResultState.UPLOADING_DONE : ResultState.IDLE)
+    })
+  }, [audioBlob])
 
   return { state, progress, handleUpload }
 }

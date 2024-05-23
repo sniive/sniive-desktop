@@ -39,6 +39,7 @@
     "@radix-ui/react-tooltip": "^1.0.7",
     "@stream-io/video-react-sdk": "^1.0.8",
     "@types/w3c-image-capture": "^1.0.10",
+    "axios": "^1.7.2",
     "buffer": "^6.0.3",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",

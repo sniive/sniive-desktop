@@ -10,13 +10,16 @@ import {
   systemPreferences
 } from 'electron'
 import { join } from 'path'
+import { Auth } from './utils'
+import axios from 'axios'
+import { Buffer } from 'buffer'
 
 type ConnectIpcParams = {
   mainWindow: BrowserWindow
   app: App
   scriptSubprocess: ChildProcessWithoutNullStreams | null
-  killScriptSubprocess: () => boolean
-  auth: { spaceName: string; accessCode: string }
+  killScriptSubprocess: (scriptSubprocess: ChildProcessWithoutNullStreams | null) => boolean
+  auth: Auth
 }
 
 export function connectIpc({
@@ -52,7 +55,9 @@ export function connectIpc({
 
   ipcMain.handle('resize', (_, arg: { width: number; height: number }) => {
     const { width, height } = arg
+    mainWindow.setResizable(true)
     mainWindow.setSize(Math.floor(width), Math.floor(height), true)
+    mainWindow.setResizable(false)
   })
 
   ipcMain.handle(
@@ -94,10 +99,10 @@ export function connectIpc({
     return result
   })
 
-  ipcMain.handle('scriptStop', killScriptSubprocess)
+  ipcMain.handle('scriptStop', () => killScriptSubprocess(scriptSubprocess))
 
   ipcMain.handle('close', () => {
-    killScriptSubprocess()
+    killScriptSubprocess(scriptSubprocess)
     app.quit()
   })
 
@@ -105,18 +110,40 @@ export function connectIpc({
 
   ipcMain.handle('isAuth', () => {
     if (is.dev) return true
-    return auth.accessCode !== '' && auth.spaceName !== ''
+    return auth.access !== '' && auth.spaceName !== ''
   })
 
   ipcMain.handle('handleCapture', async (_, capture: { base64Image: string; data: string }) => {
-    const response = await fetch('http://localhost:3000/api/dashboard/populateSpace', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(capture)
-    })
+    const requestContent = { ...capture, ...auth }
+    const response = await axios
+      .post<unknown, boolean>('http://localhost:3000/api/dashboard/populateSpace', requestContent, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      .catch(() => false)
 
-    return await response.json()
+    return response
+  })
+
+  ipcMain.handle('handleAudio', async (_, audioBase64: string) => {
+    const audioBuffer = Buffer.from(audioBase64, 'base64')
+    const audioBlob = new Blob([audioBuffer], { type: 'audio/webm' })
+
+    const formData = new FormData()
+    formData.append('audio', audioBlob, 'audio.webm')
+    const response = await axios
+      .post<unknown, boolean>('http://localhost:3000/api/dashboard/uploadAudio', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        },
+        onUploadProgress(progressEvent) {
+          const progress = Math.round(progressEvent.loaded / (progressEvent.total ?? 1))
+          mainWindow.webContents.send('uploadProgress', progress)
+        }
+      })
+      .catch(() => false)
+
+    return response
   })
 }

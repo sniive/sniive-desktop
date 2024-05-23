@@ -28,14 +28,14 @@ export function AudioPreview({ isRecording, isDisabled, audioStream }: AudioPrev
   }, [audioStream])
 
   return (
-    <div className="w-full h-5 relative flex items-center justify-center">
+    <div className="w-full h-10 relative flex items-center justify-center">
       <div
         style={{
           transform: `scaleX(${audioLevel / 100})`,
           transformOrigin: 'left center'
         }}
         className={cn(
-          'w-full h-full bg-primary absolute top-0 left-0 transition-transform',
+          'w-full h-5 bg-primary absolute top-2.5 left-0 transition-transform',
           isDisabled && 'bg-gray-500 opacity-50',
           isRecording && 'bg-red-500'
         )}
