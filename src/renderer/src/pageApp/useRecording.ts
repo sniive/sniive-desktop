@@ -44,7 +44,7 @@ export function useRecording({
     if (recordingDisabled) return
 
     if (await window.electron.ipcRenderer.invoke('scriptStart')) {
-      audioRecorder?.start()
+      audioRecorder?.start(200)
       return setIsRecording(true)
     }
 
@@ -69,11 +69,11 @@ export function useRecording({
       if (isRecording) {
         await imageCapture?.grabFrame().then(async (imageBitmap) => {
           const base64Image = await bitmapToBase64(imageBitmap)
-          const res = await window.electron.ipcRenderer.invoke('handleCapture', {
+
+          await window.electron.ipcRenderer.invoke('handleCapture', {
             data,
             base64Image
           })
-          console.log(res)
         })
       }
     },

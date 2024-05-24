@@ -15,8 +15,7 @@ type UseResultReturn = {
 }
 
 export function useResult(): UseResultReturn {
-  const { audioBlob } = useGlobalStore(({ audioBlob }) => ({ audioBlob }))
-
+  const { audioString } = useGlobalStore(({ audioString }) => ({ audioString }))
   const [state, setState] = useState<ResultState>(ResultState.IDLE)
   const [progress, setProgress] = useState<number>(0)
 
@@ -33,10 +32,10 @@ export function useResult(): UseResultReturn {
 
   const handleUpload = useCallback(async () => {
     setState(ResultState.UPLOADING)
-    await window.electron.ipcRenderer.invoke('handleAudio', audioBlob).then((result: boolean) => {
+    await window.electron.ipcRenderer.invoke('handleAudio', audioString).then((result: boolean) => {
       setState(result ? ResultState.UPLOADING_DONE : ResultState.IDLE)
     })
-  }, [audioBlob])
+  }, [audioString])
 
   return { state, progress, handleUpload }
 }

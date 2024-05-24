@@ -9,28 +9,25 @@ type UseAudioReturn = {
   audioRecorder: MediaRecorder | null
 }
 
+const audioChunks: Blob[] = []
+
 export function useAudio(): UseAudioReturn {
   const [audioInput, setAudioInput] = useState<MediaDeviceInfo | null>(null)
   const [audioStream, setAudioStream] = useState<MediaStream | null>(null)
   const [audioRecorder, setAudioRecorder] = useState<MediaRecorder | null>(null)
-  const [audioChunks, setAudioChunks] = useState<Blob[]>([])
 
-  const { setAudioBlob } = useGlobalStore(({ setAudioBlob }) => ({ setAudioBlob }))
+  const { setAudioString } = useGlobalStore(({ setAudioString }) => ({ setAudioString }))
 
   const startRecorder = async (stream: MediaStream): Promise<void> => {
-    const recorder = new MediaRecorder(stream, { mimeType: 'audio/webm' })
+    // setup audio context
+    const audioContext = new AudioContext({
+      sampleRate: 16000,
+      latencyHint: 'interactive'
+    })
+    const source = audioContext.createMediaStreamSource(stream)
+    const recorder = new MediaRecorder(source.mediaStream)
     recorder.ondataavailable = (event) => {
-      setAudioChunks((chunks) => [...chunks, event.data])
-    }
-    recorder.onstop = () => {
-      const blob = new Blob(audioChunks, { type: 'audio/webm' })
-      // convert blob to base64
-      const reader = new FileReader()
-      reader.onloadend = () => {
-        const base64data = reader.result
-        setAudioBlob(base64data as string)
-      }
-      reader.readAsDataURL(blob)
+      audioChunks.push(event.data)
     }
     setAudioRecorder(recorder)
   }
@@ -79,6 +76,14 @@ export function useAudio(): UseAudioReturn {
   const stopAudio = useCallback(async () => {
     audioStream?.getTracks().forEach((track) => track.stop())
     setAudioStream(null)
+    const blob = new Blob(audioChunks, { type: 'audio/webm' })
+    audioChunks.length = 0
+
+    const reader = new FileReader()
+    reader.readAsDataURL(blob)
+    reader.onloadend = () => {
+      setAudioString(reader.result as string)
+    }
   }, [audioStream])
 
   return { audioInput, setAudio, stopAudio, audioStream, audioRecorder }

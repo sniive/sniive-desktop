@@ -116,14 +116,18 @@ export function connectIpc({
   ipcMain.handle('handleCapture', async (_, capture: { base64Image: string; data: string }) => {
     const requestContent = { ...capture, ...auth }
     const response = await axios
-      .post<unknown, boolean>('http://localhost:3000/api/dashboard/populateSpace', requestContent, {
+      .post<boolean>('http://localhost:3000/api/dashboard/populateSpace', requestContent, {
         headers: {
           'Content-Type': 'application/json'
         }
       })
-      .catch(() => false)
+      .catch(() => null)
 
-    return response
+    if (response === null) {
+      return false
+    }
+
+    return response.data
   })
 
   ipcMain.handle('handleAudio', async (_, audioBase64: string) => {
@@ -132,8 +136,11 @@ export function connectIpc({
 
     const formData = new FormData()
     formData.append('audio', audioBlob, 'audio.webm')
+    formData.append('spaceName', auth.spaceName)
+    formData.append('access', auth.access)
+
     const response = await axios
-      .post<unknown, boolean>('http://localhost:3000/api/dashboard/uploadAudio', formData, {
+      .post<boolean>('http://localhost:3000/api/dashboard/uploadAudio', formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         },
@@ -142,8 +149,12 @@ export function connectIpc({
           mainWindow.webContents.send('uploadProgress', progress)
         }
       })
-      .catch(() => false)
+      .catch(() => null)
 
-    return response
+    if (response === null) {
+      return false
+    }
+
+    return response.data
   })
 }

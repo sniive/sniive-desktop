@@ -37,8 +37,9 @@ const api: Record<BridgeFunctions, Function> = {
   minimize: () => ipcRenderer.invoke('minimize'),
   resize: (arg: { width: number; height: number }) => ipcRenderer.invoke('resize', arg),
 
-  handleCapture: (data: any) => ipcRenderer.invoke('handleCapture', data),
-  handleAudio: (audioBlob: Blob) => ipcRenderer.invoke('handleAudio', audioBlob)
+  handleCapture: (data: { base64Image: string; data: string }) =>
+    ipcRenderer.invoke('handleCapture', data),
+  handleAudio: (audioString: string) => ipcRenderer.invoke('handleAudio', audioString)
 }
 
 // Use `contextBridge` APIs to expose Electron APIs to
