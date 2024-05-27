@@ -41,7 +41,7 @@ export function ResultButton({ state, progress, handleUpload }: ResultButtonProp
     case ResultState.UPLOADING_DONE:
       return (
         <Button variant="outline" className="p-0 h-8 w-32" size="lg" disabled>
-          Done
+          Done !
         </Button>
       )
   }

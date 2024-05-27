@@ -22,6 +22,8 @@ type ConnectIpcParams = {
   auth: Auth
 }
 
+const domain = is.dev ? 'http://localhost:3000' : 'https://sniive.com'
+
 export function connectIpc({
   mainWindow,
   scriptSubprocess,
@@ -116,7 +118,7 @@ export function connectIpc({
   ipcMain.handle('handleCapture', async (_, capture: { base64Image: string; data: string }) => {
     const requestContent = { ...capture, ...auth }
     const response = await axios
-      .post<boolean>('http://localhost:3000/api/dashboard/populateSpace', requestContent, {
+      .post<boolean>(`${domain}/api/dashboard/populateSpace`, requestContent, {
         headers: {
           'Content-Type': 'application/json'
         }
@@ -140,7 +142,7 @@ export function connectIpc({
     formData.append('access', auth.access)
 
     const response = await axios
-      .post<boolean>('http://localhost:3000/api/dashboard/uploadAudio', formData, {
+      .post<boolean>(`${domain}/api/dashboard/uploadAudio`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data'
         },
