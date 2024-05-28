@@ -34,7 +34,8 @@ export function connectIpc({
   ipcMain.handle('scriptStart', async () => {
     if (scriptSubprocess === null || scriptSubprocess === undefined) {
       try {
-        const scriptPath = join(__dirname, '../../resources/script.bin').replace(
+        const extension = process.platform === 'win32' ? 'exe' : 'bin'
+        const scriptPath = join(__dirname, `../../resources/script.${extension}`).replace(
           'app.asar',
           'app.asar.unpacked'
         )
