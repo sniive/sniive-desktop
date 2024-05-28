@@ -9,7 +9,7 @@ function Result(): JSX.Element {
   const { state, progress, handleUpload } = useResult()
 
   return (
-    <main className="min-w-screen bg-background antialiased rounded-lg flex flex-col items-center justify-center overflow-hidden pb-1">
+    <main className="min-w-screen bg-background antialiased rounded-lg flex flex-col items-center justify-center overflow-hidden pb-1 border">
       <div className="w-full grid grid-cols-3 items-center justify-center">
         <div className="flex flex-row items-center justify-start col-span-1">
           <GoBackButton />

@@ -22,7 +22,7 @@ function App(): JSX.Element {
   })
 
   return (
-    <main className="min-w-screen bg-background antialiased rounded-lg flex flex-col items-center justify-center overflow-hidden">
+    <main className="min-w-screen bg-background antialiased rounded-lg flex flex-col items-center justify-center overflow-hidden border -outline-offset-1">
       <div className="w-full grid grid-cols-3 items-center justify-center">
         <div className="flex flex-row items-center justify-start col-span-1">
           <VideoInputSource videoInput={videoInput} isDisabled={isRecording} setVideo={setVideo} />

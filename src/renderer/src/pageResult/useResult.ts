@@ -24,11 +24,15 @@ export function useResult(): UseResultReturn {
       width: 300,
       height: 80
     })
-  }, [])
 
-  window.electron.ipcRenderer.on('uploadProgress', (_: IpcRendererEvent, progress: number) => {
-    setProgress(progress)
-  })
+    window.electron.ipcRenderer.on('uploadProgress', (_: IpcRendererEvent, progress: number) => {
+      setProgress(progress)
+    })
+
+    return () => {
+      window.electron.ipcRenderer.removeAllListeners('uploadProgress')
+    }
+  }, [])
 
   const handleUpload = useCallback(async () => {
     setState(ResultState.UPLOADING)
