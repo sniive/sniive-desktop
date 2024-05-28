@@ -1,6 +1,6 @@
 import { app, BrowserWindow } from 'electron'
 import path from 'path'
-import { electronApp } from '@electron-toolkit/utils'
+import { electronApp, is, optimizer } from '@electron-toolkit/utils'
 import { ChildProcessWithoutNullStreams } from 'child_process'
 import { connectIpc } from './ipcConnect'
 import { createWindow } from './createWindow'
@@ -29,8 +29,11 @@ if (!gotTheLock) {
 
     app.on('browser-window-created', (_, window) => {
       // lauch devtools for each BrowserWindow
-      window.webContents.openDevTools()
-      //optimizer.watchWindowShortcuts(window)
+      if (is.dev) {
+        window.webContents.openDevTools()
+      } else {
+        optimizer.watchWindowShortcuts(window)
+      }
     })
 
     if (process.argv.length >= 2 && process.platform !== 'darwin') {
