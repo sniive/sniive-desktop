@@ -53,13 +53,11 @@ export function useAudio(): UseAudioReturn {
 
     const options = ['- None -', ...audioInputs.map(({ label }) => label || 'Unknown device')]
 
-    return await window.electron.ipcRenderer
-      .invoke('useMenu', options)
-      .then((result: number | null) => {
-        if (result === null) return null
-        if (result === 0) return null
-        return audioInputs[result - 1]
-      })
+    return await window.electron.ipcRenderer.invoke('useMenu', options).then((result: number) => {
+      if (result < 0) return null
+      if (result === 0) return null
+      return audioInputs[result - 1]
+    })
   }
 
   const setAudio = async () =>

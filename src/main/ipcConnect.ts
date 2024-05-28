@@ -4,13 +4,12 @@ import {
   App,
   BrowserWindow,
   DesktopCapturerSource,
-  Menu,
   desktopCapturer,
   ipcMain,
   systemPreferences
 } from 'electron'
 import { join } from 'path'
-import { Auth } from './utils'
+import { Auth, handleMenu } from './utils'
 import axios from 'axios'
 import { Buffer } from 'buffer'
 
@@ -74,33 +73,27 @@ export function connectIpc({
     'getVideoRecordingSource',
     async (_, types: Array<'window' | 'screen'>): Promise<DesktopCapturerSource | null> =>
       await desktopCapturer
-        .getSources({ types, fetchWindowIcons: true })
-        .then((sources) => (sources.length > 0 ? sources[0] : null))
+        .getSources({ types })
+        .then(async (sources) => {
+          if (sources.length === 0) return null
+          if (sources.length > 1) {
+            const template = sources
+              .filter((source) => source.id && source.name)
+              .map((source) => source.name)
+            const id = await handleMenu(template)
+            if (id !== -1) {
+              return sources[id]
+            } else {
+              return null
+            }
+          } else {
+            return sources[0]
+          }
+        })
         .catch(() => null)
   )
 
-  ipcMain.handle('useMenu', async (_, template: string[]) => {
-    let result: any = null
-    let menuClosed = false
-
-    const templateWithClick = template.map((label, index) => ({
-      label,
-      click: (): void => {
-        result = index
-      }
-    }))
-    const menu = Menu.buildFromTemplate(templateWithClick)
-    menu.popup()
-    menu.on('menu-will-close', () => {
-      menuClosed = true
-      menu.closePopup()
-    })
-    // Wait for the menu to be closed
-    while (!menuClosed) {
-      await new Promise((resolve) => setTimeout(resolve, 100))
-    }
-    return result
-  })
+  ipcMain.handle('useMenu', (_, template: string[]) => handleMenu(template))
 
   ipcMain.handle('scriptStop', () => killScriptSubprocess(scriptSubprocess))
 

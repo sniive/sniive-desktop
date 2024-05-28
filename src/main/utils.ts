@@ -1,4 +1,5 @@
 import { ChildProcessWithoutNullStreams } from 'child_process'
+import { Menu } from 'electron'
 
 export interface Auth {
   spaceName: string
@@ -33,4 +34,27 @@ export function killScriptSubprocess(
   } else {
     return true
   }
+}
+
+export async function handleMenu(template: string[]) {
+  let result = -1
+  const templateWithClick = template.map((label, index) => ({
+    label,
+    click: (): void => {
+      // copy the index to the result (works because of closure)
+      result = index
+    }
+  }))
+
+  const menu = Menu.buildFromTemplate(templateWithClick)
+  menu.popup()
+
+  await new Promise((resolve) => {
+    menu.once('menu-will-close', () => {
+      // wait 100ms to ensure the click event has been processed
+      setTimeout(resolve, 100)
+    })
+  })
+
+  return result
 }

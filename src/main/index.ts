@@ -30,7 +30,9 @@ if (!gotTheLock) {
     app.on('browser-window-created', (_, window) => {
       // lauch devtools for each BrowserWindow
       if (is.dev) {
-        window.webContents.openDevTools()
+        window.webContents.openDevTools({
+          mode: 'detach'
+        })
       } else {
         optimizer.watchWindowShortcuts(window)
       }
