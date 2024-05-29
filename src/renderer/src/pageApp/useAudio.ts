@@ -71,17 +71,17 @@ export function useAudio(): UseAudioReturn {
       }
     })
 
-  const stopAudio = useCallback(async () => {
+  const stopAudio = useCallback(() => {
     audioStream?.getTracks().forEach((track) => track.stop())
     setAudioStream(null)
     const blob = new Blob(audioChunks, { type: 'audio/webm' })
     audioChunks.length = 0
 
     const reader = new FileReader()
-    reader.readAsDataURL(blob)
     reader.onloadend = () => {
       setAudioString(reader.result as string)
     }
+    reader.readAsDataURL(blob)
   }, [audioStream])
 
   return { audioInput, setAudio, stopAudio, audioStream, audioRecorder }
