@@ -6,12 +6,21 @@ import {
   DesktopCapturerSource,
   desktopCapturer,
   ipcMain,
+  Notification,
   systemPreferences
 } from 'electron'
 import { join } from 'path'
 import { Auth, handleMenu } from './utils'
-import axios from 'axios'
-import { Buffer } from 'buffer'
+import axios, { AxiosResponse } from 'axios'
+
+type ServerInteractionSuccess = { success: string }
+type ServerInteractionError = { error: string }
+type ServerInteractionResponse = ServerInteractionSuccess | ServerInteractionError
+function isServerInteractionError(
+  response: ServerInteractionResponse
+): response is ServerInteractionError {
+  return (response as ServerInteractionError).error !== undefined
+}
 
 type ConnectIpcParams = {
   mainWindow: BrowserWindow
@@ -110,47 +119,59 @@ export function connectIpc({
   })
 
   ipcMain.handle('handleCapture', async (_, capture: { base64Image: string; data: string }) => {
-    const requestContent = { ...capture, ...auth }
     const response = await axios
-      .post<boolean>(`${domain}/api/dashboard/populateSpace`, requestContent, {
-        headers: {
-          'Content-Type': 'application/json'
+      .post<ServerInteractionResponse>(
+        `${domain}/api/dashboard/populateSpace?access=${auth.access}&spaceName=${auth.spaceName}`,
+        capture,
+        {
+          headers: {
+            'Content-Type': 'application/json'
+          }
         }
-      })
-      .catch(() => null)
+      )
+      .catch(
+        () =>
+          ({ data: { error: 'Axios error' } }) as unknown as AxiosResponse<
+            ServerInteractionResponse,
+            any
+          >
+      )
 
-    if (response === null) {
+    if (isServerInteractionError(response.data)) {
+      new Notification({ title: 'Sniive error', body: response.data.error }).show()
       return false
     }
-
-    return response.data
+    return true
   })
 
-  ipcMain.handle('handleAudio', async (_, audioBase64: string) => {
-    const audioBuffer = Buffer.from(audioBase64, 'base64')
-    const audioBlob = new Blob([audioBuffer], { type: 'audio/webm' })
-
-    const formData = new FormData()
-    formData.append('audio', audioBlob, 'audio.webm')
-    formData.append('spaceName', auth.spaceName)
-    formData.append('access', auth.access)
-
+  ipcMain.handle('handleAudio', async (_, audioBuffer: ArrayBuffer) => {
+    // post audioBuffer to server
     const response = await axios
-      .post<boolean>(`${domain}/api/dashboard/uploadAudio`, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data'
-        },
-        onUploadProgress(progressEvent) {
-          const progress = Math.round(progressEvent.loaded / (progressEvent.total ?? 1))
-          mainWindow.webContents.send('uploadProgress', progress)
+      .post<ServerInteractionResponse>(
+        `${domain}/api/dashboard/uploadAudio?access=${auth.access}&spaceName=${auth.spaceName}`,
+        audioBuffer,
+        {
+          headers: {
+            'Content-Type': 'application/octet-stream'
+          },
+          onUploadProgress(progressEvent) {
+            const progress = Math.round(progressEvent.loaded / (progressEvent.total ?? 1))
+            mainWindow.webContents.send('uploadProgress', progress)
+          }
         }
-      })
-      .catch(() => null)
+      )
+      .catch(
+        () =>
+          ({ data: { error: 'Axios error' } }) as unknown as AxiosResponse<
+            ServerInteractionResponse,
+            any
+          >
+      )
 
-    if (response === null) {
+    if (isServerInteractionError(response.data)) {
+      new Notification({ title: 'Sniive error', body: response.data.error }).show()
       return false
     }
-
-    return response.data
+    return true
   })
 }

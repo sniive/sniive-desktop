@@ -39,7 +39,7 @@ const api: Record<BridgeFunctions, Function> = {
 
   handleCapture: (data: { base64Image: string; data: string }) =>
     ipcRenderer.invoke('handleCapture', data),
-  handleAudio: (audioString: string) => ipcRenderer.invoke('handleAudio', audioString)
+  handleAudio: (audioBuffer: ArrayBuffer) => ipcRenderer.invoke('handleAudio', audioBuffer)
 }
 
 // Use `contextBridge` APIs to expose Electron APIs to

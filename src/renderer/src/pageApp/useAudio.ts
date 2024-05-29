@@ -16,7 +16,7 @@ export function useAudio(): UseAudioReturn {
   const [audioStream, setAudioStream] = useState<MediaStream | null>(null)
   const [audioRecorder, setAudioRecorder] = useState<MediaRecorder | null>(null)
 
-  const { setAudioString } = useGlobalStore(({ setAudioString }) => ({ setAudioString }))
+  const { setAudioBlob } = useGlobalStore(({ setAudioBlob }) => ({ setAudioBlob }))
 
   const startRecorder = async (stream: MediaStream): Promise<void> => {
     // setup audio context
@@ -74,14 +74,8 @@ export function useAudio(): UseAudioReturn {
   const stopAudio = useCallback(() => {
     audioStream?.getTracks().forEach((track) => track.stop())
     setAudioStream(null)
-    const blob = new Blob(audioChunks, { type: 'audio/webm' })
+    setAudioBlob(new Blob(audioChunks, { type: 'audio/webm' }))
     audioChunks.length = 0
-
-    const reader = new FileReader()
-    reader.onloadend = () => {
-      setAudioString(reader.result as string)
-    }
-    reader.readAsDataURL(blob)
   }, [audioStream])
 
   return { audioInput, setAudio, stopAudio, audioStream, audioRecorder }

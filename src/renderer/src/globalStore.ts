@@ -3,13 +3,13 @@ import { create } from 'zustand'
 type GlobalStoreState = {
   isAuth: boolean
   setIsAuth: (isAuth: boolean) => void
-  audioString: string | null
-  setAudioString: (audioString: string) => void
+  audioBlob: Blob | null
+  setAudioBlob: (audioString: Blob) => void
 }
 
 export const useGlobalStore = create<GlobalStoreState>((set) => ({
   isAuth: false,
   setIsAuth: (isAuth) => set({ isAuth }),
-  audioString: null,
-  setAudioString: (audioString) => set({ audioString })
+  audioBlob: null,
+  setAudioBlob: (audioBlob) => set({ audioBlob })
 }))
