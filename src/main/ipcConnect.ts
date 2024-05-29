@@ -131,10 +131,9 @@ export function connectIpc({
       )
       .catch(
         () =>
-          ({ data: { error: 'Axios error' } }) as unknown as AxiosResponse<
-            ServerInteractionResponse,
-            any
-          >
+          ({
+            data: { error: 'Axios error' }
+          }) as unknown as AxiosResponse<ServerInteractionResponse>
       )
 
     if (isServerInteractionError(response.data)) {
@@ -161,11 +160,10 @@ export function connectIpc({
         }
       )
       .catch(
-        () =>
-          ({ data: { error: 'Axios error' } }) as unknown as AxiosResponse<
-            ServerInteractionResponse,
-            any
-          >
+        (error) =>
+          ({
+            data: { error: `Axios error : ${error}` }
+          }) as unknown as AxiosResponse<ServerInteractionResponse>
       )
 
     if (isServerInteractionError(response.data)) {
