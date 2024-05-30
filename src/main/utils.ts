@@ -1,5 +1,8 @@
+import { is } from '@electron-toolkit/utils'
 import { ChildProcessWithoutNullStreams } from 'child_process'
 import { Menu } from 'electron'
+
+const domain = is.dev ? 'http://localhost:3000' : 'https://sniive.com'
 
 export interface Auth {
   spaceName: string
@@ -57,4 +60,29 @@ export async function handleMenu(template: string[]) {
   })
 
   return result
+}
+
+type GetUploadLinkSuccess = { uploadLink: string }
+type GetUploadLinkError = { error: string }
+export type GetUploadLinkResponse = GetUploadLinkSuccess | GetUploadLinkError
+export function isGetUploadLinkError(
+  response: GetUploadLinkResponse
+): response is GetUploadLinkError {
+  return (response as GetUploadLinkError).error !== undefined
+}
+
+type GetUploadLinkParams = {
+  spaceName: string
+  access: string
+  fileExtension: string
+}
+
+export async function getUploadLink(params: GetUploadLinkParams): Promise<GetUploadLinkResponse> {
+  return await fetch(`${domain}/api/dashboard/populateSpace`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(params)
+  }).then((res) => res.json())
 }
