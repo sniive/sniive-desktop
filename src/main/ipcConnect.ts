@@ -121,7 +121,7 @@ export function connectIpc({
   ipcMain.handle('handleCapture', async (_, capture: { base64Image: string; data: string }) => {
     const response = await axios
       .post<ServerInteractionResponse>(
-        `${domain}/api/dashboard/populateSpace?access=${auth.access}&spaceName=${auth.spaceName}`,
+        `${domain}/api/dashboard/uploadCapture?access=${auth.access}&spaceName=${auth.spaceName}`,
         capture,
         {
           headers: {
