@@ -86,3 +86,26 @@ export async function getUploadLink(params: GetUploadLinkParams): Promise<GetUpl
     body: JSON.stringify(params)
   }).then((res) => res.json())
 }
+
+type NotifyRecordingStatusSuccess = { status: 'success' }
+type NotifyRecordingStatusError = { error: string }
+export type NotifyRecordingStatusResponse =
+  | NotifyRecordingStatusSuccess
+  | NotifyRecordingStatusError
+export function isNotifyRecordingStatusError(
+  response: NotifyRecordingStatusResponse
+): response is NotifyRecordingStatusError {
+  return (response as NotifyRecordingStatusError).error !== undefined
+}
+
+export async function notifyRecordingStatus(
+  params: Auth & { status: 'start' | 'stop' }
+): Promise<NotifyRecordingStatusResponse> {
+  return await fetch(`${domain}/api/dashboard/notifyRecordingStatus`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(params)
+  }).then((res) => res.json())
+}

@@ -7,10 +7,7 @@ import { createWindow } from './createWindow'
 import { Auth, killScriptSubprocess, matchDeepLink } from './utils'
 
 let scriptSubprocess: ChildProcessWithoutNullStreams | null
-let auth: Auth = matchDeepLink(
-  'sniive://space018fcadfxe39dx7000xa956x5517ef0ccb7c?access=eyJhbGciOiJkaXIiLCJlbmMiOiJBMjU2Q0JDLUhTNTEyIiwia2lkIjoic284N1hYQzl2WXc4d2l4SE4zb3lvNGR2d1FRbTc3MWFZN25tX05OS2IxeDFiMERqX3p5LTNFekR5VDdKeklXTlpEM2dtNHRMcXoyRjF4Y0w4WlUweFEifQ..xGL6fjkOARt5p_XGgC_RnA.3k0mvvKQ4u3nZAiLUix4ymNX3btdSL14jw08PEoHEnnyYYxmeASTj6tFuZTuQdzfv9fTdqTqWV2pJki0a_TLfBmIbEocyVVNVdjFBfDYAMRUYIKbdCNiKIkDMyHjCiM5tMaW0Cp91VIB30wZfLXch6VMurDdaYPqExgeXEgOUQ-gUb8GONfQd2I1iJyQi7XbWxZeD0MwQ3vZ-ERWz5TVIp5KHQDF-26uEMZOw3ZaOzEcUYsDBhjJTebc7kVtqkY78Cbah3VtSWNiF0Ao0OQa7lPYxbqvtoPSsn82C5DHol9kEC5zfGtPOF5h3Em2xfvWIMlscXi6kVbqo8kTYfCdFVam5AQBoQl8tbGIjKREixwukpRpgXmNKYor756SP3u2.wKj6I7CJsmpnkRwFRGXy-PyeL6NT7NUFNWtyatopBzs'
-)
-//let auth: Auth = { spaceName: '', access: '' }
+let auth: Auth = { spaceName: '', access: '' }
 
 // Register the protocol for sniive://
 if (process.defaultApp) {
