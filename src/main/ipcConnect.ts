@@ -12,6 +12,7 @@ import {
 import { join } from 'path'
 import {
   Auth,
+  convertWebmToWav,
   getUploadLink,
   handleMenu,
   isGetUploadLinkError,
@@ -143,15 +144,16 @@ export function connectIpc({
   })
 
   ipcMain.handle('handleAudio', async (_, audioBuffer: ArrayBuffer) => {
-    // post audioBuffer to server
+    const wavBuffer = await convertWebmToWav(audioBuffer)
+
     const uploadLink = await getUploadLink({ ...auth, fileExtension: 'wav' })
     if (isGetUploadLinkError(uploadLink)) {
       new Notification({ title: 'Sniive error', body: uploadLink.error }).show()
       return false
     }
 
-    const response = await axios.put(uploadLink.uploadLink, audioBuffer, {
-      headers: { 'Content-Type': 'audio/wav', 'x-ms-blob-type': 'BlockBlob' },
+    const response = await axios.put(uploadLink.uploadLink, wavBuffer, {
+      headers: { 'Content-Type': 'audio/w-wav', 'x-ms-blob-type': 'BlockBlob' },
       onUploadProgress(progressEvent) {
         const progress = Math.round(progressEvent.loaded / (progressEvent.total ?? 1))
         mainWindow.webContents.send('uploadProgress', progress)

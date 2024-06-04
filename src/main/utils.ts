@@ -1,6 +1,10 @@
 import { is } from '@electron-toolkit/utils'
 import { ChildProcessWithoutNullStreams } from 'child_process'
 import { Menu } from 'electron'
+import ffmpegStatic from 'ffmpeg-static'
+import ffmpeg from 'fluent-ffmpeg'
+import path from 'path'
+import fs from 'fs'
 
 const domain = is.dev ? 'http://localhost:3000' : 'https://sniive.com'
 
@@ -108,4 +112,41 @@ export async function notifyRecordingStatus(
     },
     body: JSON.stringify(params)
   }).then((res) => res.json())
+}
+
+export async function convertWebmToWav(audioBuffer: ArrayBuffer): Promise<Buffer> {
+  ffmpeg.setFfmpegPath(ffmpegStatic ?? 'ffmpeg')
+
+  // create a temporary file
+  const inputPath = path.join(__dirname, 'temp.webm')
+  const outputPath = path.join(__dirname, 'temp.wav')
+
+  // write the audio buffer to the temporary file
+  await fs.promises.writeFile(inputPath, Buffer.from(audioBuffer))
+
+  // convert the temporary file to wav (16000 Hz, 1 channel, 16 bit, signed, little-endian)
+  await new Promise<void>((resolve, reject) => {
+    ffmpeg(inputPath)
+      .inputFormat('webm')
+      .audioChannels(1)
+      .audioFrequency(16000)
+      .audioCodec('pcm_s16le')
+      .outputFormat('wav')
+      .output(outputPath)
+      .on('end', () => resolve())
+      .on('error', (error) => reject(error))
+      .run()
+  })
+
+  // read the wav file
+  const wavBuffer = await fs.promises.readFile(outputPath).catch((error) => {
+    console.error(error)
+    return Buffer.alloc(0)
+  })
+
+  // delete the temporary files
+  await fs.promises.unlink(inputPath)
+  await fs.promises.unlink(outputPath)
+
+  return wavBuffer
 }

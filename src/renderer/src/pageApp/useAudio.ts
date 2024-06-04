@@ -74,7 +74,7 @@ export function useAudio(): UseAudioReturn {
   const stopAudio = useCallback(() => {
     audioStream?.getTracks().forEach((track) => track.stop())
     setAudioStream(null)
-    setAudioBlob(new Blob(audioChunks, { type: 'audio/wav' }))
+    setAudioBlob(new Blob(audioChunks, { type: 'audio/webm' }))
     audioChunks.length = 0
   }, [audioStream])
 
