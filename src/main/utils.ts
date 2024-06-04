@@ -1,7 +1,8 @@
 import { is } from '@electron-toolkit/utils'
 import { ChildProcessWithoutNullStreams } from 'child_process'
-import { Menu } from 'electron'
+import { App, Menu } from 'electron'
 import ffmpegStatic from 'ffmpeg-static'
+import ffprobeStatic from 'ffprobe-static'
 import ffmpeg from 'fluent-ffmpeg'
 import path from 'path'
 import fs from 'fs'
@@ -114,12 +115,19 @@ export async function notifyRecordingStatus(
   }).then((res) => res.json())
 }
 
-export async function convertWebmToWav(audioBuffer: ArrayBuffer): Promise<Buffer> {
-  ffmpeg.setFfmpegPath(ffmpegStatic ?? 'ffmpeg')
+export async function convertWebmToWav(audioBuffer: ArrayBuffer, app: App): Promise<Buffer> {
+  if (ffmpegStatic) {
+    ffmpeg.setFfmpegPath(ffmpegStatic.replace('app.asar', 'app.asar.unpacked'))
+  }
 
-  // create a temporary file
-  const inputPath = path.join(__dirname, 'temp.webm')
-  const outputPath = path.join(__dirname, 'temp.wav')
+  ffmpeg.setFfprobePath(ffprobeStatic.path.replace('app.asar', 'app.asar.unpacked'))
+
+  // get "userData" path
+  const tempPath = app.getPath('temp')
+
+  // create temporary files
+  const inputPath = path.join(tempPath, 'input.webm')
+  const outputPath = path.join(tempPath, 'output.wav')
 
   // write the audio buffer to the temporary file
   await fs.promises.writeFile(inputPath, Buffer.from(audioBuffer))

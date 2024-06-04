@@ -47,6 +47,9 @@ importers:
       ffmpeg-static:
         specifier: ^5.2.0
         version: 5.2.0
+      ffprobe-static:
+        specifier: ^3.1.0
+        version: 3.1.0
       fluent-ffmpeg:
         specifier: ^2.1.3
         version: 2.1.3
@@ -78,6 +81,9 @@ importers:
       '@electron-toolkit/tsconfig':
         specifier: ^1.0.1
         version: 1.0.1(@types/node@18.19.33)
+      '@types/ffprobe-static':
+        specifier: ^2.0.3
+        version: 2.0.3
       '@types/fluent-ffmpeg':
         specifier: ^2.1.24
         version: 2.1.24
@@ -1117,6 +1123,9 @@ packages:
   '@types/estree@1.0.5':
     resolution: {integrity: sha512-/kYRxGDLWzHOB7q+wtSUQlFrtcdUccpfy+X+9iMBpHK8QLLhx2wIPYuS5DYtR9Wa/YlZAbIovy7qVdB1Aq6Lyw==}
 
+  '@types/ffprobe-static@2.0.3':
+    resolution: {integrity: sha512-86Q8dIzhjknxA6935ZcVLkVU3t6bP+F08mdriWZk2+3UqjxIbT3QEADjbO5Yq8826cVs/aZBREVZ7jUoSTgHiw==}
+
   '@types/fluent-ffmpeg@2.1.24':
     resolution: {integrity: sha512-g5oQO8Jgi2kFS3tTub7wLvfLztr1s8tdXmRd8PiL/hLMLzTIAyMR2sANkTggM/rdEDAg3d63nYRRVepwBiCw5A==}
 
@@ -1944,6 +1953,9 @@ packages:
   ffmpeg-static@5.2.0:
     resolution: {integrity: sha512-WrM7kLW+do9HLr+H6tk7LzQ7kPqbAgLjdzNE32+u3Ff11gXt9Kkkd2nusGFrlWMIe+XaA97t+I8JS7sZIrvRgA==}
     engines: {node: '>=16'}
+
+  ffprobe-static@3.1.0:
+    resolution: {integrity: sha512-Dvpa9uhVMOYivhHKWLGDoa512J751qN1WZAIO+Xw4L/mrUSPxS4DApzSUDbCFE/LUq2+xYnznEahTd63AqBSpA==}
 
   file-entry-cache@6.0.1:
     resolution: {integrity: sha512-7Gps/XWymbLk2QLYK4NzpMOrYjMhdIxXuIvy2QBsLE6ljuodKvdkWs/cpyJJ3CVIVpH0Oi1Hvg1ovbMzLdFBBg==}
@@ -4437,6 +4449,8 @@ snapshots:
 
   '@types/estree@1.0.5': {}
 
+  '@types/ffprobe-static@2.0.3': {}
+
   '@types/fluent-ffmpeg@2.1.24':
     dependencies:
       '@types/node': 18.19.33
@@ -5607,6 +5621,8 @@ snapshots:
       progress: 2.0.3
     transitivePeerDependencies:
       - supports-color
+
+  ffprobe-static@3.1.0: {}
 
   file-entry-cache@6.0.1:
     dependencies:
