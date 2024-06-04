@@ -144,14 +144,14 @@ export function connectIpc({
 
   ipcMain.handle('handleAudio', async (_, audioBuffer: ArrayBuffer) => {
     // post audioBuffer to server
-    const uploadLink = await getUploadLink({ ...auth, fileExtension: 'webm' })
+    const uploadLink = await getUploadLink({ ...auth, fileExtension: 'wav' })
     if (isGetUploadLinkError(uploadLink)) {
       new Notification({ title: 'Sniive error', body: uploadLink.error }).show()
       return false
     }
 
     const response = await axios.put(uploadLink.uploadLink, audioBuffer, {
-      headers: { 'Content-Type': 'audio/webm', 'x-ms-blob-type': 'BlockBlob' },
+      headers: { 'Content-Type': 'audio/wav', 'x-ms-blob-type': 'BlockBlob' },
       onUploadProgress(progressEvent) {
         const progress = Math.round(progressEvent.loaded / (progressEvent.total ?? 1))
         mainWindow.webContents.send('uploadProgress', progress)
