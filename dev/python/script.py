@@ -5,6 +5,7 @@ from pynput import mouse, keyboard
 from pynput.keyboard import Key, KeyCode
 from pynput.mouse import Button
 from threading import Lock
+from screeninfo import get_monitors
 
 class State(Enum):
     NORMAL = "normal"
@@ -50,18 +51,14 @@ class MouseEvent:
 class BufferWithTime:
     def __init__(self):
         self.buffer: list[KeyEvent | MouseEvent] = []
-        self.time: float = time
     
     def get(self):
-        return self.buffer, self.time
+        return self.buffer, time.time()
     
     def clear(self):
         self.buffer = []
-        self.time = time
     
     def append(self, event: KeyEvent | MouseEvent):
-        if len(self.buffer) == 0:
-            self.time = time.time()
         self.buffer.append(event)
 
 
@@ -148,6 +145,12 @@ def on_scroll(x: int, y: int, dx: int, dy: int):
 
 
 def start_recording():
+    for monitor in get_monitors():
+        x = monitor.x
+        y = monitor.y
+        width = monitor.width
+        height = monitor.height
+
     keyboard_listener = keyboard.Listener(
         on_press=on_press,
         on_release=on_release
