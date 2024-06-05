@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { IpcRendererEvent } from 'electron'
 import { useGlobalStore } from '@renderer/globalStore'
 import { useNavigate } from 'react-router-dom'
-import sharp from 'sharp'
+import { Buffer } from 'buffer'
 
 type UseRecordingParams = {
   audioRecorder: MediaRecorder | null
@@ -23,21 +23,22 @@ async function bitmapToBase64(
   setScreenDimensions: ReturnType<(typeof useGlobalStore)['getState']>['setScreenDimensions']
 ): Promise<string> {
   setScreenDimensions({ screenHeight: imageBitmap.width, screenWidth: imageBitmap.height })
-  const canvas = new OffscreenCanvas(imageBitmap.width, imageBitmap.height)
-  const context = canvas.getContext('2d')
-  context?.drawImage(imageBitmap, 0, 0)
 
   const maxWidth = 1920
   const maxHeight = 1080
 
+  // resize image to fit (scale to the smaller dimension)
+  const scale = Math.min(maxWidth / imageBitmap.width, maxHeight / imageBitmap.height)
+  const canvas = new OffscreenCanvas(
+    Math.round(imageBitmap.width * scale),
+    Math.round(imageBitmap.height * scale)
+  )
+  const ctx = canvas.getContext('2d') as OffscreenCanvasRenderingContext2D
+  ctx.drawImage(imageBitmap, 0, 0, canvas.width, canvas.height)
+
   return await canvas
     .convertToBlob({ type: 'image/jpeg' })
-    .then(
-      async (blob) =>
-        await sharp(await blob.arrayBuffer())
-          .resize(maxWidth, maxHeight, { fit: 'inside' })
-          .toBuffer()
-    )
+    .then(async (blob) => Buffer.from(await blob.arrayBuffer()))
     .then((buffer) => buffer.toString('base64'))
 }
 
