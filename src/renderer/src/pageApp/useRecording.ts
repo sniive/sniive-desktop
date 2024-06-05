@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { IpcRendererEvent } from 'electron'
 import { useGlobalStore } from '@renderer/globalStore'
 import { useNavigate } from 'react-router-dom'
-import { Buffer } from 'buffer'
+import sharp from 'sharp'
 
 type UseRecordingParams = {
   audioRecorder: MediaRecorder | null
@@ -18,13 +18,27 @@ type UseRecordingReturn = {
   stopRecording: () => void
 }
 
-async function bitmapToBase64(imageBitmap: ImageBitmap): Promise<string> {
+async function bitmapToBase64(
+  imageBitmap: ImageBitmap,
+  setScreenDimensions: ReturnType<(typeof useGlobalStore)['getState']>['setScreenDimensions']
+): Promise<string> {
+  setScreenDimensions({ screenHeight: imageBitmap.width, screenWidth: imageBitmap.height })
   const canvas = new OffscreenCanvas(imageBitmap.width, imageBitmap.height)
   const context = canvas.getContext('2d')
   context?.drawImage(imageBitmap, 0, 0)
+
+  const maxWidth = 1920
+  const maxHeight = 1080
+
   return await canvas
     .convertToBlob({ type: 'image/jpeg' })
-    .then(async (blob) => Buffer.from(await blob.arrayBuffer()).toString('base64'))
+    .then(
+      async (blob) =>
+        await sharp(await blob.arrayBuffer())
+          .resize(maxWidth, maxHeight, { fit: 'inside' })
+          .toBuffer()
+    )
+    .then((buffer) => buffer.toString('base64'))
 }
 
 export function useRecording({
@@ -36,7 +50,14 @@ export function useRecording({
   const navigate = useNavigate()
 
   const [isRecording, setIsRecording] = useState<boolean>(false)
-  const { isAuth, setIsAuth } = useGlobalStore(({ isAuth, setIsAuth }) => ({ isAuth, setIsAuth }))
+  const { isAuth, setIsAuth, setRecordingStartTime, setScreenDimensions } = useGlobalStore(
+    ({ isAuth, setIsAuth, setRecordingStartTime, setScreenDimensions }) => ({
+      isAuth,
+      setIsAuth,
+      setRecordingStartTime,
+      setScreenDimensions
+    })
+  )
 
   const recordingDisabled = useMemo(() => imageCapture === null || !isAuth, [imageCapture, isAuth])
 
@@ -45,6 +66,7 @@ export function useRecording({
 
     if (await window.electron.ipcRenderer.invoke('scriptStart')) {
       audioRecorder?.start(200)
+      setRecordingStartTime(Date.now())
       return setIsRecording(true)
     }
 
@@ -68,7 +90,7 @@ export function useRecording({
     async (_: IpcRendererEvent, data: string) => {
       if (isRecording) {
         await imageCapture?.grabFrame().then(async (imageBitmap) => {
-          const base64Image = await bitmapToBase64(imageBitmap)
+          const base64Image = await bitmapToBase64(imageBitmap, setScreenDimensions)
 
           await window.electron.ipcRenderer.invoke('handleCapture', {
             data,

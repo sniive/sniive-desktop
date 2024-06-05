@@ -4,7 +4,14 @@ directories:
   buildResources: build
 files:
   - '!**/.vscode/*'
+  - '!**/.github/*'
+  - '!**/.gitignore'
+  - '!**/.husky/*'
   - '!src/*'
+  - '!dist/*'
+  - '!dev/*'
+  - '!node_modules/*/{CHANGELOG.md,README.md,README,readme.md,readme}'
+  - '!node_modules/*/{test,__tests__,tests,powered-test,example,examples}'
   - '!electron.vite.config.{js,ts,mjs,cjs}'
   - '!{.eslintignore,.eslintrc.cjs,.prettierignore,.prettierrc.yaml,dev-app-update.yml,CHANGELOG.md,README.md}'
   - '!{.env,.env.*,.npmrc,pnpm-lock.yaml}'
