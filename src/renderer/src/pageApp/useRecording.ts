@@ -22,7 +22,7 @@ async function bitmapToBase64(
   imageBitmap: ImageBitmap,
   setScreenDimensions: ReturnType<(typeof useGlobalStore)['getState']>['setScreenDimensions']
 ): Promise<string> {
-  setScreenDimensions({ screenHeight: imageBitmap.width, screenWidth: imageBitmap.height })
+  setScreenDimensions({ screenHeight: imageBitmap.height, screenWidth: imageBitmap.width })
 
   const maxWidth = 1920
   const maxHeight = 1080
