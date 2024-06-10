@@ -29,17 +29,19 @@ async function bitmapToBase64(
 
   // resize image to fit (scale to the smaller dimension)
   const scale = Math.min(maxWidth / imageBitmap.width, maxHeight / imageBitmap.height)
-  const canvas = new OffscreenCanvas(
-    Math.round(imageBitmap.width * scale),
-    Math.round(imageBitmap.height * scale)
-  )
+  const scaledWidth = imageBitmap.width * scale
+  const scaledHeight = imageBitmap.height * scale
+  const canvas = new OffscreenCanvas(scaledWidth, scaledHeight)
   const ctx = canvas.getContext('2d') as OffscreenCanvasRenderingContext2D
-  ctx.drawImage(imageBitmap, 0, 0, canvas.width, canvas.height)
+  ctx.drawImage(imageBitmap, 0, 0, scaledWidth, scaledHeight)
 
   return await canvas
     .convertToBlob({ type: 'image/jpeg' })
-    .then(async (blob) => Buffer.from(await blob.arrayBuffer()))
-    .then((buffer) => buffer.toString('base64'))
+    .then(async (blob) => Buffer.from(await blob.arrayBuffer()).toString('base64'))
+    .catch((error) => {
+      console.error(error)
+      return ''
+    })
 }
 
 export function useRecording({
@@ -87,23 +89,18 @@ export function useRecording({
     navigate('/result')
   }, [audioRecorder, recordingDisabled])
 
-  const handleData = useCallback(
-    async (_: IpcRendererEvent, data: string) => {
-      if (isRecording) {
-        await imageCapture?.grabFrame().then(async (imageBitmap) => {
-          const base64Image = await bitmapToBase64(imageBitmap, setScreenDimensions)
-
-          await window.electron.ipcRenderer.invoke('handleCapture', {
-            data,
-            base64Image
-          })
+  useEffect(() => {
+    const handleData = async (_: IpcRendererEvent, data: string) => {
+      if (isRecording && imageCapture) {
+        const imageBitmap = await imageCapture.grabFrame()
+        const base64Image = await bitmapToBase64(imageBitmap, setScreenDimensions)
+        await window.electron.ipcRenderer.invoke('handleCapture', {
+          data,
+          base64Image
         })
       }
-    },
-    [imageCapture, isRecording]
-  )
+    }
 
-  useEffect(() => {
     window.electron.ipcRenderer.invoke('isAuth').then((isAuth: boolean) => {
       setIsAuth(isAuth)
       if (isAuth) {
@@ -112,7 +109,7 @@ export function useRecording({
     })
 
     return () => window.electron.ipcRenderer.removeAllListeners('scriptData')
-  }, [handleData])
+  }, [imageCapture, isRecording])
 
   return { isRecording, recordingDisabled, startRecording, stopRecording }
 }

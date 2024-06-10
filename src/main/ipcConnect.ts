@@ -144,7 +144,14 @@ export function connectIpc({
   })
 
   ipcMain.handle('handleAudio', async (_, audioBuffer: ArrayBuffer) => {
-    const wavBuffer = await convertWebmToWav(audioBuffer, app)
+    const wavBuffer = await convertWebmToWav(audioBuffer, app).catch((error) => {
+      console.error(error)
+      return null
+    })
+    if (!wavBuffer) {
+      new Notification({ title: 'Sniive error', body: 'Failed to convert audio' }).show()
+      return false
+    }
 
     const uploadLink = await getUploadLink({ ...auth, fileExtension: 'wav' })
     if (isGetUploadLinkError(uploadLink)) {

@@ -49,6 +49,9 @@ export function useResult(): UseResultReturn {
           setState(result ? ResultState.UPLOADING_DONE : ResultState.IDLE)
         }
       })
+      .catch(() => {
+        setState(ResultState.IDLE)
+      })
   }, [audioBlob])
 
   return { state, progress, handleUpload }

@@ -44,6 +44,12 @@ export function useAudio(): UseAudioReturn {
         setAudioStream(stream)
         startRecorder(stream)
       })
+      .catch((error) => {
+        console.error(error)
+        setAudioInput(null)
+        setAudioStream(null)
+        setAudioRecorder(null)
+      })
 
   const getAudioDevices = async (): Promise<MediaDeviceInfo | null> => {
     const audioInputs: MediaDeviceInfo[] = await navigator.mediaDevices
@@ -61,18 +67,27 @@ export function useAudio(): UseAudioReturn {
   }
 
   const setAudio = async () =>
-    getAudioDevices().then((source) => {
-      setAudioInput(source)
-      if (source) {
-        startAudioStream(source)
-      } else {
+    await getAudioDevices()
+      .then((source) => {
+        setAudioInput(source)
+        if (source) {
+          startAudioStream(source)
+        } else {
+          setAudioStream(null)
+          setAudioRecorder(null)
+        }
+      })
+      .catch((error) => {
+        console.error(error)
+        setAudioInput(null)
         setAudioStream(null)
         setAudioRecorder(null)
-      }
-    })
+      })
 
   const stopAudio = useCallback(() => {
-    audioStream?.getTracks().forEach((track) => track.stop())
+    if (audioStream) {
+      audioStream.getTracks().forEach((track) => track.stop())
+    }
     setAudioStream(null)
     setAudioBlob(new Blob(audioChunks, { type: 'audio/webm' }))
     audioChunks.length = 0

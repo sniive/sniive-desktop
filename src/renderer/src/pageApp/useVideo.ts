@@ -40,6 +40,12 @@ export function useVideo(): UseVideoReturn {
           height: 90 + (height ?? 0) * (300 / (width ?? 1))
         })
       })
+      .catch((error) => {
+        console.error(error)
+        setVideoInput(null)
+        setVideoStream(null)
+        setImageCapture(null)
+      })
 
   const getVideoDevices = async (): Promise<DesktopCapturerSource | null> =>
     window.electron.ipcRenderer.invoke('getScreenAccess').then(async (access: boolean) => {
@@ -48,18 +54,27 @@ export function useVideo(): UseVideoReturn {
     })
 
   const setVideo = async () =>
-    getVideoDevices().then((source) => {
-      setVideoInput(source)
-      if (source) {
-        startVideoStream(source)
-      } else {
+    await getVideoDevices()
+      .then((source) => {
+        setVideoInput(source)
+        if (source) {
+          startVideoStream(source)
+        } else {
+          setVideoStream(null)
+          setImageCapture(null)
+        }
+      })
+      .catch((error) => {
+        console.error(error)
+        setVideoInput(null)
         setVideoStream(null)
         setImageCapture(null)
-      }
-    })
+      })
 
   const stopVideo = useCallback(async () => {
-    videoStream?.getTracks().forEach((track) => track.stop())
+    if (videoStream) {
+      videoStream.getTracks().forEach((track) => track.stop())
+    }
     setVideoStream(null)
     setImageCapture(null)
   }, [videoStream])

@@ -89,7 +89,12 @@ export async function getUploadLink(params: GetUploadLinkParams): Promise<GetUpl
       'Content-Type': 'application/json'
     },
     body: JSON.stringify(params)
-  }).then((res) => res.json())
+  })
+    .then((res) => res.json())
+    .catch((error) => {
+      console.error(error)
+      return { error: 'Failed to get upload link' }
+    })
 }
 
 type NotifyRecordingStatusSuccess = { status: 'success' }
@@ -112,7 +117,12 @@ export async function notifyRecordingStatus(
       'Content-Type': 'application/json'
     },
     body: JSON.stringify(params)
-  }).then((res) => res.json())
+  })
+    .then((res) => res.json())
+    .catch((error) => {
+      console.error(error)
+      return { error: 'Failed to notify recording status' }
+    })
 }
 
 export async function convertWebmToWav(audioBuffer: ArrayBuffer, app: App): Promise<Buffer> {
@@ -144,6 +154,9 @@ export async function convertWebmToWav(audioBuffer: ArrayBuffer, app: App): Prom
       .on('end', () => resolve())
       .on('error', (error) => reject(error))
       .run()
+  }).catch((error) => {
+    console.error(error)
+    return
   })
 
   // read the wav file
