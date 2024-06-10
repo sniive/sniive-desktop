@@ -128,11 +128,10 @@ export async function convertWebmToWav(audioBuffer: ArrayBuffer): Promise<Buffer
   if (ffmpegStatic) {
     ffmpeg.setFfmpegPath(ffmpegStatic.replace('app.asar', 'app.asar.unpacked'))
   }
-
   ffmpeg.setFfprobePath(ffprobeStatic.path.replace('app.asar', 'app.asar.unpacked'))
 
   const audioChunks: Buffer[] = []
-  const chunkSize = 1024
+  const chunkSize = 1024 * 1024
   for (let i = 0; i < audioBuffer.byteLength; i += chunkSize) {
     audioChunks.push(Buffer.from(audioBuffer.slice(i, i + chunkSize)))
   }
