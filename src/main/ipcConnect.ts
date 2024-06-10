@@ -144,7 +144,7 @@ export function connectIpc({
   })
 
   ipcMain.handle('handleAudio', async (_, audioBuffer: ArrayBuffer) => {
-    const wavBuffer = await convertWebmToWav(audioBuffer, app).catch((error) => {
+    const wavBuffer = await convertWebmToWav(audioBuffer).catch((error) => {
       console.error(error)
       return null
     })

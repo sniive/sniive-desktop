@@ -1,11 +1,10 @@
 import { is } from '@electron-toolkit/utils'
 import { ChildProcessWithoutNullStreams } from 'child_process'
-import { App, Menu } from 'electron'
+import { Menu } from 'electron'
 import ffmpegStatic from 'ffmpeg-static'
 import ffprobeStatic from 'ffprobe-static'
 import ffmpeg from 'fluent-ffmpeg'
-import path from 'path'
-import fs from 'fs'
+import { Readable, Writable } from 'stream'
 
 const domain = is.dev ? 'http://localhost:3000' : 'https://sniive.com'
 
@@ -125,49 +124,43 @@ export async function notifyRecordingStatus(
     })
 }
 
-export async function convertWebmToWav(audioBuffer: ArrayBuffer, app: App): Promise<Buffer> {
+export async function convertWebmToWav(audioBuffer: ArrayBuffer): Promise<Buffer> {
   if (ffmpegStatic) {
     ffmpeg.setFfmpegPath(ffmpegStatic.replace('app.asar', 'app.asar.unpacked'))
   }
 
   ffmpeg.setFfprobePath(ffprobeStatic.path.replace('app.asar', 'app.asar.unpacked'))
 
-  // get "userData" path
-  const tempPath = app.getPath('temp')
+  const audioChunks: Buffer[] = []
+  const chunkSize = 1024
+  for (let i = 0; i < audioBuffer.byteLength; i += chunkSize) {
+    audioChunks.push(Buffer.from(audioBuffer.slice(i, i + chunkSize)))
+  }
+  const inputStream = Readable.from(audioChunks)
 
-  // create temporary files
-  const inputPath = path.join(tempPath, 'input.webm')
-  const outputPath = path.join(tempPath, 'output.wav')
+  // create a writable stream to store the wav buffer
+  const wavBuffer: Buffer[] = []
+  const outputStream = new Writable({
+    write(chunk, _, callback) {
+      wavBuffer.push(chunk)
+      callback()
+    }
+  })
 
-  // write the audio buffer to the temporary file
-  await fs.promises.writeFile(inputPath, Buffer.from(audioBuffer))
-
-  // convert the temporary file to wav (16000 Hz, 1 channel, 16 bit, signed, little-endian)
-  await new Promise<void>((resolve, reject) => {
-    ffmpeg(inputPath)
+  // convert the input stream to wav (16000 Hz, 1 channel, 16 bit, signed, little-endian)
+  return new Promise((resolve, reject) => {
+    ffmpeg(inputStream)
       .inputFormat('webm')
       .audioChannels(1)
       .audioFrequency(16000)
       .audioCodec('pcm_s16le')
-      .outputFormat('wav')
-      .output(outputPath)
-      .on('end', () => resolve())
-      .on('error', (error) => reject(error))
-      .run()
-  }).catch((error) => {
-    console.error(error)
-    return
+      .format('wav')
+      .pipe(outputStream)
+      .on('finish', () => {
+        resolve(Buffer.concat(wavBuffer))
+      })
+      .on('error', (error) => {
+        reject(error)
+      })
   })
-
-  // read the wav file
-  const wavBuffer = await fs.promises.readFile(outputPath).catch((error) => {
-    console.error(error)
-    return Buffer.alloc(0)
-  })
-
-  // delete the temporary files
-  await fs.promises.unlink(inputPath)
-  await fs.promises.unlink(outputPath)
-
-  return wavBuffer
 }
