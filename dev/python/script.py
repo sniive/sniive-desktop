@@ -53,7 +53,7 @@ class BufferWithTime:
         self.startTime: float = 0
     
     def get(self):
-        return self.buffer, self.startTime, time.time()
+        return self.buffer, int(self.startTime * 1000), int(time.time() * 1000)
     
     def clear(self):
         self.buffer = []
