@@ -1,6 +1,7 @@
 import { useGlobalStore } from '@renderer/globalStore'
 import { IpcRendererEvent } from 'electron'
 import { useCallback, useEffect, useState } from 'react'
+import { convertAudioBufferToWavBlob } from './wavConverter'
 
 enum ResultState {
   IDLE,
@@ -40,10 +41,15 @@ export function useResult(): UseResultReturn {
   const handleUpload = useCallback(async () => {
     if (!audioBlob) return
 
-    const audioBuffer = await audioBlob.arrayBuffer()
+    const arrayBuffer = await audioBlob.arrayBuffer()
+    const audioContext = new AudioContext()
+    const audioBuffer = await audioContext.decodeAudioData(arrayBuffer)
+    const wavBlob = await convertAudioBufferToWavBlob(audioBuffer)
+    const wavBuffer = await wavBlob.arrayBuffer()
+
     setState(ResultState.UPLOADING)
     await window.electron.ipcRenderer
-      .invoke('handleAudio', audioBuffer)
+      .invoke('handleAudio', wavBuffer)
       .then(async (result: boolean) => {
         if (await window.electron.ipcRenderer.invoke('handleMetadata', metadata)) {
           setState(result ? ResultState.UPLOADING_DONE : ResultState.IDLE)

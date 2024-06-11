@@ -1,12 +1,7 @@
-import { is } from '@electron-toolkit/utils'
 import { ChildProcessWithoutNullStreams } from 'child_process'
 import { Menu } from 'electron'
-import ffmpegStatic from 'ffmpeg-static'
-import ffprobeStatic from 'ffprobe-static'
-import ffmpeg from 'fluent-ffmpeg'
-import { Readable, Writable } from 'stream'
 
-const domain = is.dev ? 'http://localhost:3000' : 'https://sniive.com'
+const domain = 'https://sniive.com'
 
 export interface Auth {
   spaceName: string
@@ -122,44 +117,4 @@ export async function notifyRecordingStatus(
       console.error(error)
       return { error: 'Failed to notify recording status' }
     })
-}
-
-export async function convertWebmToWav(audioBuffer: ArrayBuffer): Promise<Buffer> {
-  if (ffmpegStatic) {
-    ffmpeg.setFfmpegPath(ffmpegStatic.replace('app.asar', 'app.asar.unpacked'))
-  }
-  ffmpeg.setFfprobePath(ffprobeStatic.path.replace('app.asar', 'app.asar.unpacked'))
-
-  const audioChunks: Buffer[] = []
-  const chunkSize = 1024 * 1024
-  for (let i = 0; i < audioBuffer.byteLength; i += chunkSize) {
-    audioChunks.push(Buffer.from(audioBuffer.slice(i, i + chunkSize)))
-  }
-  const inputStream = Readable.from(audioChunks)
-
-  // create a writable stream to store the wav buffer
-  const wavBuffer: Buffer[] = []
-  const outputStream = new Writable({
-    write(chunk, _, callback) {
-      wavBuffer.push(chunk)
-      callback()
-    }
-  })
-
-  // convert the input stream to wav (16000 Hz, 1 channel, 16 bit, signed, little-endian)
-  return new Promise((resolve, reject) => {
-    ffmpeg(inputStream)
-      .inputFormat('webm')
-      .audioChannels(1)
-      .audioFrequency(16000)
-      .audioCodec('pcm_s16le')
-      .format('wav')
-      .pipe(outputStream)
-      .on('finish', () => {
-        resolve(Buffer.concat(wavBuffer))
-      })
-      .on('error', (error) => {
-        reject(error)
-      })
-  })
 }

@@ -40,7 +40,7 @@ const api: Record<BridgeFunctions, Function> = {
 
   handleCapture: (data: { base64Image: string; data: string }) =>
     ipcRenderer.invoke('handleCapture', data),
-  handleAudio: (audioBuffer: ArrayBuffer) => ipcRenderer.invoke('handleAudio', audioBuffer),
+  handleAudio: (wavBuffer: ArrayBuffer) => ipcRenderer.invoke('handleAudio', wavBuffer),
   handleMetadata: (metadata: {
     recordingStartTime: number
     screenWidth: number
