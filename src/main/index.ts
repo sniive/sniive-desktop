@@ -5,6 +5,7 @@ import { ChildProcessWithoutNullStreams } from 'child_process'
 import { connectIpc } from './ipcConnect'
 import { createWindow } from './createWindow'
 import { Auth, killScriptSubprocess, matchDeepLink } from './utils'
+import { update } from './update'
 
 let scriptSubprocess: ChildProcessWithoutNullStreams | null
 let auth: Auth = { spaceName: '', access: '' }
@@ -46,7 +47,7 @@ if (!gotTheLock) {
     }
 
     const mainWindow = createWindow()
-    //update(mainWindow)
+    update(mainWindow)
     connectIpc({ mainWindow, scriptSubprocess, killScriptSubprocess, auth, app })
 
     app.on('second-instance', (_, commandLine: string[]) => {

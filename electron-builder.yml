@@ -51,9 +51,9 @@ linux:
 appImage:
   artifactName: ${name}-${version}.${ext}
 npmRebuild: false
-#publish:
-#  provider: generic
-#  url: https://example.com/auto-updates
+publish:
+  provider: generic
+  url: https://sniive.com/api/downloads
 protocols:
   name: sniive
   schemes:
