@@ -1,7 +1,8 @@
+import { is } from '@electron-toolkit/utils'
 import { ChildProcessWithoutNullStreams } from 'child_process'
 import { Menu } from 'electron'
 
-const domain = 'https://sniive.com'
+const domain = is.dev ? 'http://localhost:3000' : 'https://sniive.com'
 
 export interface Auth {
   spaceName: string
@@ -12,7 +13,7 @@ export function matchDeepLink(link: string): Auth {
   const regex = /sniive:\/\/(.+)\?access=(.+)/
   const match = link.match(regex)
   if (match && match.length === 3) {
-    const spaceName = match[1]
+    const spaceName = decodeURI(match[1]).replace(/[/\\]/g, '')
     const access = match[2]
     return { spaceName, access }
   }
