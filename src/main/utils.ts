@@ -77,13 +77,17 @@ type GetUploadLinkParams = {
   fileExtension: string
 }
 
-export async function getUploadLink(params: GetUploadLinkParams): Promise<GetUploadLinkResponse> {
-  return await fetch(`${domain}/api/dashboard/populateSpace`, {
+export async function getUploadLink({
+  spaceName,
+  access,
+  fileExtension
+}: GetUploadLinkParams): Promise<GetUploadLinkResponse> {
+  return await fetch(`${domain}/api/spaces/${spaceName}/populateSpace`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
     },
-    body: JSON.stringify(params)
+    body: JSON.stringify({ access, fileExtension })
   })
     .then((res) => res.json())
     .catch((error) => {
@@ -103,15 +107,17 @@ export function isNotifyRecordingStatusError(
   return (response as NotifyRecordingStatusError).error !== undefined
 }
 
-export async function notifyRecordingStatus(
-  params: Auth & { status: 'start' | 'stop' }
-): Promise<NotifyRecordingStatusResponse> {
-  return await fetch(`${domain}/api/dashboard/notifyRecordingStatus`, {
+export async function notifyRecordingStatus({
+  spaceName,
+  access,
+  status
+}: Auth & { status: 'start' | 'stop' }): Promise<NotifyRecordingStatusResponse> {
+  return await fetch(`${domain}/api/spaces/${spaceName}/notifyRecordingStatus`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
     },
-    body: JSON.stringify(params)
+    body: JSON.stringify({ access, status })
   })
     .then((res) => res.json())
     .catch((error) => {

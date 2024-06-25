@@ -7,7 +7,7 @@ import { createWindow } from './createWindow'
 import { Auth, killScriptSubprocess, matchDeepLink } from './utils'
 
 let scriptSubprocess: ChildProcessWithoutNullStreams | null
-let auth: Auth = { spaceName: '', access: '' }
+let auth: Auth = is.dev ? matchDeepLink('') : { spaceName: '', access: '' }
 
 // Register the protocol for sniive://
 if (process.defaultApp) {
