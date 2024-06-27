@@ -62,8 +62,8 @@ export async function handleMenu(template: string[]) {
   return result
 }
 
-type GetUploadLinkSuccess = { uploadLink: string }
-type GetUploadLinkError = { error: string }
+type GetUploadLinkSuccess = string
+type GetUploadLinkError = { error: { message: string } }
 export type GetUploadLinkResponse = GetUploadLinkSuccess | GetUploadLinkError
 export function isGetUploadLinkError(
   response: GetUploadLinkResponse
@@ -82,7 +82,7 @@ export async function getUploadLink({
   access,
   fileExtension
 }: GetUploadLinkParams): Promise<GetUploadLinkResponse> {
-  return await fetch(`${domain}/api/spaces/${spaceName}/populateSpace`, {
+  return await fetch(`${domain}/api/spaces/${spaceName}/populate`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
@@ -96,8 +96,8 @@ export async function getUploadLink({
     })
 }
 
-type NotifyRecordingStatusSuccess = { status: 'success' }
-type NotifyRecordingStatusError = { error: string }
+type NotifyRecordingStatusSuccess = true
+type NotifyRecordingStatusError = { error: { message: string } }
 export type NotifyRecordingStatusResponse =
   | NotifyRecordingStatusSuccess
   | NotifyRecordingStatusError
@@ -112,7 +112,7 @@ export async function notifyRecordingStatus({
   access,
   status
 }: Auth & { status: 'start' | 'stop' }): Promise<NotifyRecordingStatusResponse> {
-  return await fetch(`${domain}/api/spaces/${spaceName}/notifyRecordingStatus`, {
+  return await fetch(`${domain}/api/spaces/${spaceName}/notify-recording-status`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'
