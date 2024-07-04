@@ -10,8 +10,10 @@ import { AudioPreview } from '@renderer/components/audioPreview'
 import { useVideo } from './useVideo'
 import { useAudio } from './useAudio'
 import { useRecording } from './useRecording'
+import { useUpdate } from './useUpdate'
 
 function App(): JSX.Element {
+  const { updateInfo } = useUpdate()
   const { videoInput, videoStream, imageCapture, setVideo, stopVideo } = useVideo()
   const { audioInput, audioStream, audioRecorder, setAudio, stopAudio } = useAudio()
   const { isRecording, recordingDisabled, startRecording, stopRecording } = useRecording({
@@ -48,6 +50,7 @@ function App(): JSX.Element {
         audioStream={audioStream}
         isRecording={isRecording}
         isDisabled={recordingDisabled}
+        updateInfo={updateInfo}
       />
       <VideoPreview videoStream={videoStream} isRecording={isRecording} />
     </main>

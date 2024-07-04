@@ -36,8 +36,6 @@ dmg:
   artifactName: ${name}-${version}.${ext}
 linux:
   target:
-    - AppImage
-    - snap
     - deb
   maintainer: Sniive
   category: Utility
@@ -52,8 +50,9 @@ appImage:
   artifactName: ${name}-${version}.${ext}
 npmRebuild: false
 publish:
-  provider: generic
-  url: https://sniive.com/api/downloads
+  provider: github
+  owner: sniive
+  repo: sniive-desktop-releases
 protocols:
   name: sniive
   schemes:

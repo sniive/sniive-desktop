@@ -1,68 +1,37 @@
-import { MessageBoxOptions, app, dialog } from 'electron'
-import { autoUpdater, type ProgressInfo, type UpdateDownloadedEvent } from 'electron-updater'
+import { app } from 'electron'
+import { autoUpdater } from 'electron-updater'
 
 export async function update(win: Electron.BrowserWindow) {
-  // When set to false, the update download will be triggered through the API
-  autoUpdater.autoDownload = false
-  autoUpdater.disableWebInstaller = false
-  autoUpdater.allowDowngrade = false
+  autoUpdater.autoDownload = true
 
   if (!app.isPackaged) {
     const error = new Error('The update feature is only available after the package.')
     console.error(error)
+    return
   }
 
-  try {
-    const res = await autoUpdater.checkForUpdatesAndNotify()
-    if (res) {
-      const options: MessageBoxOptions = {
-        type: 'info',
-        buttons: ['Yes', 'No'],
-        defaultId: 0,
-        title: 'Update Available',
-        message: 'A new version of the app is available. Do you want to update now?',
-        detail: 'A new version of the app is available. Do you want to update now?'
-      }
+  autoUpdater.on('checking-for-update', () => {
+    console.log('Checking for update...')
+  })
+  autoUpdater.on('update-available', (info) => {
+    console.log('Update available.', info)
+    win.webContents.send('update-available', info)
+  })
+  autoUpdater.on('update-not-available', (info) => {
+    console.log('Update not available.', info)
+  })
+  autoUpdater.on('error', (err) => {
+    console.error('Error in auto-updater. ', err)
+  })
+  autoUpdater.on('download-progress', (progressObj) => {
+    let log_message = 'Download speed: ' + progressObj.bytesPerSecond
+    log_message = log_message + ' - Downloaded ' + progressObj.percent + '%'
+    log_message = log_message + ' (' + progressObj.transferred + '/' + progressObj.total + ')'
+    console.log(log_message)
+  })
+  autoUpdater.on('update-downloaded', (info) => {
+    console.log('Update downloaded', info)
+  })
 
-      const response = await dialog.showMessageBox(win, options)
-
-      if (response.response === 0) {
-        const download = await new Promise<boolean>((resolve, reject) => {
-          startDownload(
-            (error, progressInfo) => {
-              if (error) {
-                // feedback download error message
-                win.webContents.send('update-error', { message: error.message, error })
-                reject(error)
-              } else {
-                // feedback update progress message
-                win.webContents.send('download-progress', progressInfo)
-              }
-            },
-            () => {
-              // feedback update downloaded message
-              win.webContents.send('update-downloaded')
-              resolve(true)
-            }
-          )
-        })
-
-        if (download) {
-          autoUpdater.quitAndInstall()
-        }
-      }
-    }
-  } catch (error) {
-    console.error(error)
-  }
-}
-
-function startDownload(
-  callback: (error: Error | null, info: ProgressInfo | null) => void,
-  complete: (event: UpdateDownloadedEvent) => void
-) {
-  autoUpdater.on('download-progress', (info: ProgressInfo) => callback(null, info))
-  autoUpdater.on('error', (error: Error) => callback(error, null))
-  autoUpdater.on('update-downloaded', complete)
-  autoUpdater.downloadUpdate()
+  await autoUpdater.checkForUpdatesAndNotify()
 }

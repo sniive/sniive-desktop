@@ -1,6 +1,6 @@
 {
   "name": "sniive",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "The sniive desktop app",
   "main": "./out/main/index.js",
   "author": "Sniive",
@@ -20,7 +20,8 @@
     "build:mac": "electron-vite build && electron-builder --mac",
     "build:linux": "electron-vite build && electron-builder --linux",
     "dev:build": "./dev/build.sh",
-    "prepare": "husky"
+    "prepare": "husky",
+    "publish": "electron-builder --linux --win -p always"
   },
   "lint-staged": {
     "**/*.{js,jsx,cjs,mjs,ts,tsx,cts,mts}": [
