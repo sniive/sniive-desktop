@@ -53,14 +53,16 @@ export function useRecording({
   const navigate = useNavigate()
 
   const [isRecording, setIsRecording] = useState<boolean>(false)
-  const { isAuth, setIsAuth, setRecordingStartTime, setScreenDimensions } = useGlobalStore(
-    ({ isAuth, setIsAuth, setRecordingStartTime, setScreenDimensions }) => ({
-      isAuth,
-      setIsAuth,
-      setRecordingStartTime,
-      setScreenDimensions
-    })
-  )
+  const { isAuth, setIsAuth, setRecordingStartTime, setRecordingEndTime, setScreenDimensions } =
+    useGlobalStore(
+      ({ isAuth, setIsAuth, setRecordingStartTime, setRecordingEndTime, setScreenDimensions }) => ({
+        isAuth,
+        setIsAuth,
+        setRecordingStartTime,
+        setRecordingEndTime,
+        setScreenDimensions
+      })
+    )
 
   const recordingDisabled = useMemo(() => imageCapture === null || !isAuth, [imageCapture, isAuth])
 
@@ -84,6 +86,7 @@ export function useRecording({
 
     await window.electron.ipcRenderer.invoke('scriptStop')
     audioRecorder?.stop()
+    setRecordingEndTime(Date.now())
     setIsRecording(false)
 
     navigate('/result')

@@ -1,10 +1,11 @@
 import { create } from 'zustand'
 
-type Metadata = {
-  recordingStartTime?: number
-  screenWidth?: number
-  screenHeight?: number
-}
+type Metadata = Partial<{
+  recordingStartTime: number
+  recordingEndTime: number
+  screenWidth: number
+  screenHeight: number
+}>
 
 type GlobalStoreState = {
   isAuth: boolean
@@ -13,6 +14,7 @@ type GlobalStoreState = {
   setAudioBlob: (audioString: Blob) => void
   metadata: Metadata | null
   setRecordingStartTime: (recordingStartTime: number) => void
+  setRecordingEndTime: (recordingEndTime: number) => void
   setScreenDimensions: (screenDimensions: { screenWidth: number; screenHeight: number }) => void
 }
 
@@ -24,6 +26,8 @@ export const useGlobalStore = create<GlobalStoreState>((set, get) => ({
   metadata: null,
   setRecordingStartTime: (recordingStartTime) =>
     set({ metadata: { ...get().metadata, recordingStartTime } }),
+  setRecordingEndTime: (recordingEndTime) =>
+    set({ metadata: { ...get().metadata, recordingEndTime } }),
   setScreenDimensions: (screenDimensions) =>
     set({ metadata: { ...get().metadata, ...screenDimensions } })
 }))

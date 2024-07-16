@@ -165,32 +165,26 @@ export function connectIpc({
     return true
   })
 
-  ipcMain.handle(
-    'handleMetadata',
-    async (
-      _,
-      metadata: { recordingStartTime: number; screenWidth: number; screenHeight: number }
-    ) => {
-      const uploadLink = await getUploadLink({ ...auth, fileExtension: 'metadata' })
-      if (isGetUploadLinkError(uploadLink)) {
-        new Notification({ title: 'Sniive error', body: uploadLink.error.message }).show()
-        return false
-      }
-
-      const response = await axios.put(uploadLink, metadata, {
-        headers: { 'Content-Type': 'application/json', 'x-ms-blob-type': 'BlockBlob' },
-        onUploadProgress(progressEvent) {
-          const progress = Math.round(progressEvent.loaded / (progressEvent.total ?? 1))
-          mainWindow.webContents.send('uploadProgress', progress)
-        }
-      })
-
-      if (response.status !== 201) {
-        new Notification({ title: 'Sniive error', body: 'Failed to upload metadata' }).show()
-        return false
-      }
-
-      return true
+  ipcMain.handle('handleMetadata', async (_, metadata) => {
+    const uploadLink = await getUploadLink({ ...auth, fileExtension: 'metadata' })
+    if (isGetUploadLinkError(uploadLink)) {
+      new Notification({ title: 'Sniive error', body: uploadLink.error.message }).show()
+      return false
     }
-  )
+
+    const response = await axios.put(uploadLink, metadata, {
+      headers: { 'Content-Type': 'application/json', 'x-ms-blob-type': 'BlockBlob' },
+      onUploadProgress(progressEvent) {
+        const progress = Math.round(progressEvent.loaded / (progressEvent.total ?? 1))
+        mainWindow.webContents.send('uploadProgress', progress)
+      }
+    })
+
+    if (response.status !== 201) {
+      new Notification({ title: 'Sniive error', body: 'Failed to upload metadata' }).show()
+      return false
+    }
+
+    return true
+  })
 }
