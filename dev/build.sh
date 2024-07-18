@@ -23,7 +23,6 @@ cd "$(dirname "$0")"
 # require poetry & nuitka
 (
     cd ./python || { handle_error $LINENO; }
-    source "$(poetry env info --path)/Scripts/activate" || { handle_error $LINENO; }
     source "$(poetry env info --path)/bin/activate" || { handle_error $LINENO; }
     poetry install || { handle_error $LINENO; }
     nuitka3 --standalone --onefile --output-dir=./output/ ./script.py || { handle_error $LINENO; }
