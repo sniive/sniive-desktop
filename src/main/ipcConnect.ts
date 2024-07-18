@@ -7,7 +7,6 @@ import {
   desktopCapturer,
   ipcMain,
   Notification,
-  screen,
   systemPreferences
 } from 'electron'
 import { join } from 'path'
@@ -36,7 +35,7 @@ export function connectIpc({
   auth,
   app
 }: ConnectIpcParams) {
-  ipcMain.handle('scriptStart', async () => {
+  ipcMain.handle('scriptStart', async (_, id: string) => {
     if (scriptSubprocess === null || scriptSubprocess === undefined) {
       try {
         const extension = process.platform === 'win32' ? 'exe' : 'bin'
@@ -44,7 +43,11 @@ export function connectIpc({
           'app.asar',
           'app.asar.unpacked'
         )
-        scriptSubprocess = spawn(scriptPath)
+        if (process.platform === 'linux') {
+          scriptSubprocess = spawn(scriptPath)
+        } else {
+          scriptSubprocess = spawn(scriptPath, [id])
+        }
         scriptSubprocess.stdout.on('data', (data) => {
           mainWindow.webContents.send('scriptData', data.toString())
         })
@@ -189,9 +192,5 @@ export function connectIpc({
     }
 
     return true
-  })
-
-  ipcMain.handle('getAllDisplays', async () => {
-    return screen.getAllDisplays()
   })
 }

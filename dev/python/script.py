@@ -5,6 +5,10 @@ from pynput import mouse, keyboard
 from pynput.keyboard import Key, KeyCode
 from pynput.mouse import Button
 from threading import Lock
+from typing import Literal
+import pywinctl as pwc
+from pywinbox import Rect
+import argparse
 
 class State(Enum):
     NORMAL = "normal"
@@ -38,14 +42,16 @@ class KeyEvent:
             return "None"
 
 class MouseEvent:
-    def __init__(self, x: int, y: int, button: Button, pressed: bool):
+    def __init__(self, x: int, y: int, button: Button, pressed: bool, display: Rect | None):
         self.pressed: bool = pressed
         self.x: int = x
         self.y: int = y
         self.button: Button = button
+        self.display: Rect | None = display
     
     def __str__(self):
-        return f"""{{"x":{self.x},"y":{self.y},"button":"{self.button.name}","pressed":{"true" if self.pressed else "false"}}}"""
+        formatted_display = f"""{{"left":{self.display.left},"top":{self.display.top},"right":{self.display.right},"bottom":{self.display.bottom}}}""" if self.display is not None else "null"
+        return f"""{{"x":{self.x},"y":{self.y},"button":"{self.button.name}","pressed":{"true" if self.pressed else "false"},"display":{formatted_display}}}"""
 
 class BufferWithTime:
     def __init__(self):
@@ -64,7 +70,35 @@ class BufferWithTime:
             self.startTime = time.time()
         self.buffer.append(event)
 
-
+class DisplayDevice:
+    def __init__(self, id: int, type: Literal["window", "screen"] | None):
+        self.type: Literal["window", "screen"] | None = type
+        self.display: pwc.Window | Rect | None = None
+        try:
+            if type == "window":
+                self.display = pwc.Window(id)
+            elif type == "screen":
+                screens = pwc.getAllScreens()
+                for screen_name in screens:
+                    screen = screens[screen_name]
+                    if screen.get("id") == id:
+                        self.display = screen.get("workarea")
+                        break
+        except:
+            self.type = None
+            self.display = None
+    
+    def get_display(self) -> Rect | None:
+        if self.type == "screen":
+            return self.display
+        elif self.type == "window":
+            window: pwc.Window = self.display
+            if window.isActive:
+                return window.getClientFrame()
+            else:
+                return Rect(-1, -1, -1, -1)
+        else:
+            return None
 
 class StateMachine:
     def __init__(self, mutex: Lock):
@@ -136,26 +170,39 @@ def on_release(key: Key | KeyCode | None):
     stateMachine.update(KeyEvent(key, False))
 
 
-def on_click(x: int, y: int, button: Button, pressed: bool):
-    stateMachine.update(MouseEvent(x, y, button, pressed))
+def init_display_device(id: str | None) -> DisplayDevice:
+    if id is None:
+        return DisplayDevice(-1, None)
 
-
-def on_scroll(x: int, y: int, dx: int, dy: int):
-    json_string = f"""{{"action":"scrolled", "vertical_direction":{dy}, "horizontal_direction":{dx}, "x":{x}, "y":{y}, "time":{time.time()}}}"""
-    #output_json(json_string)
-
+    #id if of the form "window:<window_id>", or "screen:<screen_id>"
+    if id.startswith("window:"):
+        window_id = int(id.split(":")[1])
+        return DisplayDevice(window_id, "window")
+    elif id.startswith("screen:"):
+        screen_id = int(id.split(":")[1])
+        return DisplayDevice(screen_id, "screen")
     
+    return DisplayDevice(-1, None)
 
+def start_recording(id: str | None = None):
+    display_device: DisplayDevice = init_display_device(id)
+    
+    def on_click(x: int, y: int, button: Button, pressed: bool):
+        display = display_device.get_display()
+        if display is None:
+            return stateMachine.update(MouseEvent(x, y, button, pressed, None))
+        else:
+            if (display.left <= x <= display.right) and (display.top <= y <= display.bottom):
+                return stateMachine.update(MouseEvent(x, y, button, pressed, display))
 
-def start_recording():
     keyboard_listener = keyboard.Listener(
         on_press=on_press,
         on_release=on_release
     )
 
     mouse_listener = mouse.Listener(
-            on_click=on_click,
-            on_scroll=on_scroll
+        on_click=on_click,
+        #on_scroll=on_scroll
     )
     
     keyboard_listener.start()
@@ -165,5 +212,9 @@ def start_recording():
 
 
 if __name__ == "__main__":
-    start_recording()
+    parser = argparse.ArgumentParser("sniive_script")
+    parser.add_argument("id", type=str, default=None, nargs="?")
+    args = parser.parse_args()
     
+    id = args.id
+    start_recording(id)

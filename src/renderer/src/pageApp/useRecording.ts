@@ -3,6 +3,7 @@ import { IpcRendererEvent } from 'electron'
 import { useGlobalStore } from '@renderer/globalStore'
 import { useNavigate } from 'react-router-dom'
 import { Buffer } from 'buffer'
+import { RateLimiter } from '@renderer/lib/utils'
 
 type UseRecordingParams = {
   audioRecorder: MediaRecorder | null
@@ -48,35 +49,32 @@ export function useRecording({
   const navigate = useNavigate()
 
   const [isRecording, setIsRecording] = useState<boolean>(false)
-  const { isAuth, setIsAuth, setRecordingStartTime, setRecordingEndTime, metadata } =
+  const { isAuth, setIsAuth, setRecordingStartTime, setRecordingEndTime, displayId } =
     useGlobalStore(
-      ({ isAuth, setIsAuth, setRecordingStartTime, setRecordingEndTime, metadata }) => ({
+      ({ isAuth, setIsAuth, setRecordingStartTime, setRecordingEndTime, displayId }) => ({
         isAuth,
         setIsAuth,
         setRecordingStartTime,
         setRecordingEndTime,
-        metadata
+        displayId
       })
     )
 
   const recordingDisabled = useMemo(() => {
-    const { screenWidth, screenHeight, screenOffsetX, screenOffsetY } = metadata ?? {}
-    const metadataValues = [screenWidth, screenHeight, screenOffsetX, screenOffsetY]
-
-    return imageCapture === null || !isAuth || metadataValues.some((value) => value === undefined)
-  }, [imageCapture, isAuth, metadata])
+    return imageCapture === null || !isAuth
+  }, [imageCapture, isAuth])
 
   const startRecording = useCallback(async () => {
     if (recordingDisabled) return
 
-    if (await window.electron.ipcRenderer.invoke('scriptStart')) {
+    if (await window.electron.ipcRenderer.invoke('scriptStart', displayId)) {
       audioRecorder?.start(200)
       setRecordingStartTime(Date.now())
       return setIsRecording(true)
     }
 
     setIsRecording(false)
-  }, [audioRecorder, recordingDisabled, metadata])
+  }, [audioRecorder, recordingDisabled, displayId])
 
   const stopRecording = useCallback(async () => {
     if (recordingDisabled) return
@@ -93,18 +91,11 @@ export function useRecording({
   }, [audioRecorder, recordingDisabled])
 
   useEffect(() => {
-    const screenWidth = metadata?.screenWidth ?? 0
-    const screenHeight = metadata?.screenHeight ?? 0
-    const screenOffsetX = metadata?.screenOffsetX ?? 0
-    const screenOffsetY = metadata?.screenOffsetY ?? 0
-
-    console.log('screenWidth', screenWidth)
-    console.log('screenHeight', screenHeight)
-    console.log('screenOffsetX', screenOffsetX)
-    console.log('screenOffsetY', screenOffsetY)
-
+    const fiveSecondsRateLimiter = new RateLimiter(10, 5000)
+    const oneMinuteRateLimiter = new RateLimiter(80, 60000)
     const handleData = async (_: IpcRendererEvent, data: string) => {
-      if (isRecording && imageCapture) {
+      const isRateLimited = fiveSecondsRateLimiter.update() || oneMinuteRateLimiter.update()
+      if (isRecording && imageCapture && !isRateLimited) {
         const imageBitmap = await imageCapture.grabFrame()
         const base64Image = await bitmapToBase64(imageBitmap)
         await window.electron.ipcRenderer.invoke('handleCapture', {
@@ -122,7 +113,7 @@ export function useRecording({
     })
 
     return () => window.electron.ipcRenderer.removeAllListeners('scriptData')
-  }, [imageCapture, isRecording, metadata])
+  }, [imageCapture, isRecording])
 
   return { isRecording, recordingDisabled, startRecording, stopRecording }
 }

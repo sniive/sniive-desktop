@@ -16,8 +16,7 @@ export enum BridgeFunctions {
   'resize' = 'resize',
   'handleCapture' = 'handleCapture',
   'handleAudio' = 'handleAudio',
-  'handleMetadata' = 'handleMetadata',
-  'getAllDisplays' = 'getAllDisplays'
+  'handleMetadata' = 'handleMetadata'
 }
 
 // Custom APIs for renderer
@@ -30,7 +29,7 @@ const api: Record<BridgeFunctions, Function> = {
   isWindows: () => process.platform === 'win32',
   isLinux: () => /linux/.test(process.platform),
   getScreenAccess: () => ipcRenderer.invoke('getScreenAccess'),
-  scriptStart: () => ipcRenderer.invoke('scriptStart'),
+  scriptStart: (id: string) => ipcRenderer.invoke('scriptStart', id),
   scriptStop: () => ipcRenderer.invoke('scriptStop'),
   isAuth: () => ipcRenderer.invoke('isAuth'),
 
@@ -45,8 +44,7 @@ const api: Record<BridgeFunctions, Function> = {
     recordingStartTime: number
     screenWidth: number
     screenHeight: number
-  }) => ipcRenderer.invoke('handleMetadata', metadata),
-  getAllDisplays: () => ipcRenderer.invoke('getAllDisplays')
+  }) => ipcRenderer.invoke('handleMetadata', metadata)
 }
 
 // Use `contextBridge` APIs to expose Electron APIs to
