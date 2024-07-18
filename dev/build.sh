@@ -7,7 +7,13 @@
 # python3 -m nuitka --standalone --onefile --output-dir=./output/ ./script.py
 # cp .\output\script.exe ..\..\resources\script.exe
 
-cd "$(dirname "$0")"
+#set "$(dirname "$0")" as variable (and add absolute path of the script)
+location="$(cd "$(dirname "$0")" && pwd)"
+
+# Change directory to the location of the script
+cd "$location" || { echo "An error occurred on line $LINENO."; exit 1; }
+echo $location
+
 
 # Function to handle errors
 handle_error() {
@@ -25,7 +31,7 @@ handle_error() {
     cp ./icon_512x512.png ../../build/icon.png || { handle_error $LINENO; }
 )
 
-cd "$(dirname "$0")"
+cd "$location" || { echo "An error occurred on line $LINENO."; exit 1; }
 
 # require poetry & nuitka
 (
