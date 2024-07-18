@@ -8,6 +8,7 @@ from threading import Lock
 from typing import Literal
 import pywinctl as pwc
 from pywinbox import Rect
+import pymonctl as pmc
 import argparse
 
 class State(Enum):
@@ -187,8 +188,9 @@ def init_display_device(id: str | None) -> DisplayDevice:
 def start_recording(id: str | None = None):
     display_device: DisplayDevice = init_display_device(id)
     
-    def on_click(x: int, y: int, button: Button, pressed: bool):
+    def on_click(_x: int, _y: int, button: Button, pressed: bool):
         display = display_device.get_display()
+        x, y = pmc.getMousePos()
         if display is None:
             return stateMachine.update(MouseEvent(x, y, button, pressed, None))
         else:
@@ -218,3 +220,4 @@ if __name__ == "__main__":
     
     id = args.id
     start_recording(id)
+    
