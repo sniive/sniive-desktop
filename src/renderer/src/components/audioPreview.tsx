@@ -1,5 +1,4 @@
 import { cn } from '@renderer/lib/utils'
-import { createSoundDetector } from '@stream-io/video-react-sdk'
 import { useEffect, useState } from 'react'
 import {
   Tooltip,
@@ -9,6 +8,7 @@ import {
 } from '@renderer/components/ui/tooltip'
 
 import sniive from '@renderer/assets/sniive.svg'
+import { createSoundDetector } from '@renderer/lib/createSoundDetector'
 
 export type AudioPreviewProps = {
   isRecording: boolean
