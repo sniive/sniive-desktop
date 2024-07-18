@@ -1,6 +1,6 @@
 {
   "name": "sniive",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "The sniive desktop app",
   "main": "./out/main/index.js",
   "author": "Sniive",
