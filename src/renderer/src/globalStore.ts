@@ -5,6 +5,8 @@ type Metadata = Partial<{
   recordingEndTime: number
   screenWidth: number
   screenHeight: number
+  screenOffsetX: number
+  screenOffsetY: number
 }>
 
 type GlobalStoreState = {
@@ -16,6 +18,7 @@ type GlobalStoreState = {
   setRecordingStartTime: (recordingStartTime: number) => void
   setRecordingEndTime: (recordingEndTime: number) => void
   setScreenDimensions: (screenDimensions: { screenWidth: number; screenHeight: number }) => void
+  setScreenOffset: (screenOffset: { screenOffsetX: number; screenOffsetY: number }) => void
 }
 
 export const useGlobalStore = create<GlobalStoreState>((set, get) => ({
@@ -29,5 +32,6 @@ export const useGlobalStore = create<GlobalStoreState>((set, get) => ({
   setRecordingEndTime: (recordingEndTime) =>
     set({ metadata: { ...get().metadata, recordingEndTime } }),
   setScreenDimensions: (screenDimensions) =>
-    set({ metadata: { ...get().metadata, ...screenDimensions } })
+    set({ metadata: { ...get().metadata, ...screenDimensions } }),
+  setScreenOffset: (screenOffset) => set({ metadata: { ...get().metadata, ...screenOffset } })
 }))

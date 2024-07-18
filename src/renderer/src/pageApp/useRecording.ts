@@ -18,12 +18,7 @@ type UseRecordingReturn = {
   stopRecording: () => void
 }
 
-async function bitmapToBase64(
-  imageBitmap: ImageBitmap,
-  setScreenDimensions: ReturnType<(typeof useGlobalStore)['getState']>['setScreenDimensions']
-): Promise<string> {
-  setScreenDimensions({ screenHeight: imageBitmap.height, screenWidth: imageBitmap.width })
-
+async function bitmapToBase64(imageBitmap: ImageBitmap): Promise<string> {
   const maxWidth = 1920
   const maxHeight = 1080
 
@@ -53,18 +48,23 @@ export function useRecording({
   const navigate = useNavigate()
 
   const [isRecording, setIsRecording] = useState<boolean>(false)
-  const { isAuth, setIsAuth, setRecordingStartTime, setRecordingEndTime, setScreenDimensions } =
+  const { isAuth, setIsAuth, setRecordingStartTime, setRecordingEndTime, metadata } =
     useGlobalStore(
-      ({ isAuth, setIsAuth, setRecordingStartTime, setRecordingEndTime, setScreenDimensions }) => ({
+      ({ isAuth, setIsAuth, setRecordingStartTime, setRecordingEndTime, metadata }) => ({
         isAuth,
         setIsAuth,
         setRecordingStartTime,
         setRecordingEndTime,
-        setScreenDimensions
+        metadata
       })
     )
 
-  const recordingDisabled = useMemo(() => imageCapture === null || !isAuth, [imageCapture, isAuth])
+  const recordingDisabled = useMemo(() => {
+    const { screenWidth, screenHeight, screenOffsetX, screenOffsetY } = metadata ?? {}
+    const metadataValues = [screenWidth, screenHeight, screenOffsetX, screenOffsetY]
+
+    return imageCapture === null || !isAuth || metadataValues.some((value) => value === undefined)
+  }, [imageCapture, isAuth, metadata])
 
   const startRecording = useCallback(async () => {
     if (recordingDisabled) return
@@ -76,7 +76,7 @@ export function useRecording({
     }
 
     setIsRecording(false)
-  }, [audioRecorder, recordingDisabled])
+  }, [audioRecorder, recordingDisabled, metadata])
 
   const stopRecording = useCallback(async () => {
     if (recordingDisabled) return
@@ -93,10 +93,20 @@ export function useRecording({
   }, [audioRecorder, recordingDisabled])
 
   useEffect(() => {
+    const screenWidth = metadata?.screenWidth ?? 0
+    const screenHeight = metadata?.screenHeight ?? 0
+    const screenOffsetX = metadata?.screenOffsetX ?? 0
+    const screenOffsetY = metadata?.screenOffsetY ?? 0
+
+    console.log('screenWidth', screenWidth)
+    console.log('screenHeight', screenHeight)
+    console.log('screenOffsetX', screenOffsetX)
+    console.log('screenOffsetY', screenOffsetY)
+
     const handleData = async (_: IpcRendererEvent, data: string) => {
       if (isRecording && imageCapture) {
         const imageBitmap = await imageCapture.grabFrame()
-        const base64Image = await bitmapToBase64(imageBitmap, setScreenDimensions)
+        const base64Image = await bitmapToBase64(imageBitmap)
         await window.electron.ipcRenderer.invoke('handleCapture', {
           data,
           base64Image
@@ -112,7 +122,7 @@ export function useRecording({
     })
 
     return () => window.electron.ipcRenderer.removeAllListeners('scriptData')
-  }, [imageCapture, isRecording])
+  }, [imageCapture, isRecording, metadata])
 
   return { isRecording, recordingDisabled, startRecording, stopRecording }
 }

@@ -1,4 +1,5 @@
-import { DesktopCapturerSource } from 'electron'
+import { useGlobalStore } from '@renderer/globalStore'
+import { DesktopCapturerSource, Display } from 'electron'
 import { useCallback, useState } from 'react'
 
 type UseVideoReturn = {
@@ -13,6 +14,13 @@ export function useVideo(): UseVideoReturn {
   const [videoInput, setVideoInput] = useState<DesktopCapturerSource | null>(null)
   const [videoStream, setVideoStream] = useState<MediaStream | null>(null)
   const [imageCapture, setImageCapture] = useState<ImageCapture | null>(null)
+
+  const { setScreenDimensions, setScreenOffset } = useGlobalStore(
+    ({ setScreenDimensions, setScreenOffset }) => ({
+      setScreenDimensions,
+      setScreenOffset
+    })
+  )
 
   const startVideoStream = async (source: DesktopCapturerSource): Promise<void> =>
     await navigator.mediaDevices
@@ -50,7 +58,25 @@ export function useVideo(): UseVideoReturn {
   const getVideoDevices = async (): Promise<DesktopCapturerSource | null> =>
     window.electron.ipcRenderer.invoke('getScreenAccess').then(async (access: boolean) => {
       if (!access) return null
-      return await window.electron.ipcRenderer.invoke('getVideoRecordingSource', ['screen'])
+      const source: DesktopCapturerSource | null =
+        await window.electron.ipcRenderer.invoke('getVideoRecordingSource')
+
+      if (source) {
+        const displays: Display[] = await window.electron.ipcRenderer.invoke('getAllDisplays')
+        const matchedDisplay = displays.find(
+          (display) => display.id.toString() === source.display_id
+        )
+
+        const { x, y, width, height } = matchedDisplay
+          ? matchedDisplay.bounds
+          : { x: 0, y: 0, width: 0, height: 0 }
+        setScreenDimensions({ screenWidth: width, screenHeight: height })
+        setScreenOffset({ screenOffsetX: x, screenOffsetY: y })
+
+        return source
+      } else {
+        return null
+      }
     })
 
   const setVideo = async () =>

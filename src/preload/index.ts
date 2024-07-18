@@ -16,14 +16,14 @@ export enum BridgeFunctions {
   'resize' = 'resize',
   'handleCapture' = 'handleCapture',
   'handleAudio' = 'handleAudio',
-  'handleMetadata' = 'handleMetadata'
+  'handleMetadata' = 'handleMetadata',
+  'getAllDisplays' = 'getAllDisplays'
 }
 
 // Custom APIs for renderer
 // eslint-disable-next-line @typescript-eslint/ban-types
 const api: Record<BridgeFunctions, Function> = {
-  getVideoRecordingSources: (types: Array<'window' | 'screen'>) =>
-    ipcRenderer.invoke('getVideoRecordingSource', types),
+  getVideoRecordingSources: () => ipcRenderer.invoke('getVideoRecordingSource'),
   useMenu: (template: string[]) => ipcRenderer.invoke('useMenu', template),
 
   isOSX: () => process.platform === 'darwin',
@@ -45,7 +45,8 @@ const api: Record<BridgeFunctions, Function> = {
     recordingStartTime: number
     screenWidth: number
     screenHeight: number
-  }) => ipcRenderer.invoke('handleMetadata', metadata)
+  }) => ipcRenderer.invoke('handleMetadata', metadata),
+  getAllDisplays: () => ipcRenderer.invoke('getAllDisplays')
 }
 
 // Use `contextBridge` APIs to expose Electron APIs to

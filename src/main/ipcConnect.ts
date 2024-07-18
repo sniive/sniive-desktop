@@ -7,6 +7,7 @@ import {
   desktopCapturer,
   ipcMain,
   Notification,
+  screen,
   systemPreferences
 } from 'electron'
 import { join } from 'path'
@@ -75,29 +76,31 @@ export function connectIpc({
       systemPreferences.getMediaAccessStatus('screen') === 'granted'
   )
 
-  ipcMain.handle(
-    'getVideoRecordingSource',
-    async (_, types: Array<'window' | 'screen'>): Promise<DesktopCapturerSource | null> =>
-      await desktopCapturer
-        .getSources({ types })
-        .then(async (sources) => {
-          if (sources.length === 0) return null
-          if (sources.length > 1) {
-            const template = sources
-              .filter((source) => source.id && source.name)
-              .map((source) => source.name)
-            const id = await handleMenu(template)
-            if (id !== -1) {
-              return sources[id]
-            } else {
-              return null
-            }
+  ipcMain.handle('getVideoRecordingSource', async (): Promise<DesktopCapturerSource | null> => {
+    // if platform is linux, return null
+    const types: ('screen' | 'window')[] =
+      process.platform === 'linux' ? ['screen'] : ['screen', 'window']
+
+    return await desktopCapturer
+      .getSources({ types })
+      .then(async (sources) => {
+        if (sources.length === 0) return null
+        if (sources.length > 1) {
+          const template = sources
+            .filter((source) => source.id && source.name)
+            .map((source) => source.name)
+          const id = await handleMenu(template)
+          if (id !== -1) {
+            return sources[id]
           } else {
-            return sources[0]
+            return null
           }
-        })
-        .catch(() => null)
-  )
+        } else {
+          return sources[0]
+        }
+      })
+      .catch(() => null)
+  })
 
   ipcMain.handle('useMenu', (_, template: string[]) => handleMenu(template))
 
@@ -186,5 +189,9 @@ export function connectIpc({
     }
 
     return true
+  })
+
+  ipcMain.handle('getAllDisplays', async () => {
+    return screen.getAllDisplays()
   })
 }
