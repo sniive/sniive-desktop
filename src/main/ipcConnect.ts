@@ -81,8 +81,7 @@ export function connectIpc({
 
   ipcMain.handle('getVideoRecordingSource', async (): Promise<DesktopCapturerSource | null> => {
     // if platform is linux, return null
-    const types: ('screen' | 'window')[] =
-      process.platform === 'linux' ? ['screen'] : ['screen', 'window']
+    const types: ('screen' | 'window')[] = ['screen', 'window']
 
     return await desktopCapturer
       .getSources({ types })

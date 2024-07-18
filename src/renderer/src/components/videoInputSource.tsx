@@ -26,7 +26,10 @@ export function VideoInputSource({ isDisabled, videoInput, setVideo }: VideoInpu
         <TooltipContent>
           <p>
             {videoInput
-              ? videoInput.name || videoInput.display_id || videoInput.id || 'Unknown source'
+              ? videoInput.name ||
+                videoInput.display_id ||
+                videoInput.id ||
+                'Limited support - unknown source'
               : 'No video source selected'}
           </p>
         </TooltipContent>
