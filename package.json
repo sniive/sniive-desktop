@@ -19,7 +19,7 @@
     "build:win": "npm run build && electron-builder --win",
     "build:mac": "electron-vite build && electron-builder --mac",
     "build:linux": "electron-vite build && electron-builder --linux",
-    "dev:build": "sh ./dev/build.sh",
+    "dev:build": "./dev/build.sh",
     "prepare": "husky",
     "publish": "electron-builder --linux --win -p always"
   },

@@ -1,5 +1,12 @@
 #!/usr/bin/env bash
 
+# On Windows, do :
+# cd .\dev\python\
+# poetry shell
+# pyenv global 3.11
+# python3 -m nuitka --standalone --onefile --output-dir=./output/ ./script.py
+# cp .\output\script.exe ..\..\resources\script.exe
+
 cd "$(dirname "$0")"
 
 # Function to handle errors
