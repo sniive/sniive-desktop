@@ -2,8 +2,8 @@
 
 # On Windows, do :
 # cd .\dev\python\
-# poetry shell
 # pyenv global 3.11
+# poetry shell
 # python3 -m nuitka --standalone --onefile --output-dir=./output/ ./script.py
 # cp .\output\script.exe ..\..\resources\script.exe
 
