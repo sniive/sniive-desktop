@@ -34,7 +34,7 @@ export class RateLimiter {
     const currentTime = Date.now()
     const oldestActionTime = this.fixedLengthQueue.push(currentTime)
 
-    if (currentTime - oldestActionTime < this.interval) {
+    if (currentTime - (oldestActionTime ?? 0) < this.interval) {
       // Rate limit exceeded
       return true
     }
