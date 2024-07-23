@@ -1,10 +1,12 @@
 {
   "name": "sniive",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "The sniive desktop app",
   "main": "./out/main/index.js",
   "author": "Sniive",
   "homepage": "https://sniive.com",
+  "license": "UNLICENSED",
+  "private": true,
   "scripts": {
     "format": "prettier --write .",
     "lint": "eslint . --ext .js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix",
