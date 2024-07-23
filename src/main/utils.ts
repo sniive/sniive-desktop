@@ -125,3 +125,29 @@ export async function notifyRecordingStatus({
       return { error: 'Failed to notify recording status' }
     })
 }
+
+type RunTutorialSuccess = true
+type RunTutorialError = { error: { message: string } }
+export type RunTutorialResponse = RunTutorialSuccess | RunTutorialError
+export function isRunTutorialError(response: RunTutorialResponse): response is RunTutorialError {
+  return (response as RunTutorialError).error !== undefined
+}
+
+export async function runTutorial({
+  spaceName,
+  access,
+  metadata
+}: Auth & { metadata: any }): Promise<NotifyRecordingStatusResponse> {
+  return await fetch(`${domain}/api/spaces/${spaceName}/run-tutorial`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ access, metadata })
+  })
+    .then((res) => res.json())
+    .catch((error) => {
+      console.error(error)
+      return { error: 'Failed to run tutorial' }
+    })
+}
