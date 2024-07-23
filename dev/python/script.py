@@ -79,7 +79,7 @@ class DisplayDevice:
             if type == "window":
                 self.display = pwc.Window(id)
             elif type == "screen":
-                screens = pwc.getAllScreens()
+                screens = pmc.getAllMonitorsDict()
                 for screen_name in screens:
                     screen = screens[screen_name]
                     if screen.get("id") == id:

@@ -41,14 +41,21 @@ export function useResult(): UseResultReturn {
   const handleUpload = useCallback(async () => {
     if (!audioBlob) return
 
-    const wavBuffer = await audioBlob.arrayBuffer().then(async (arrayBuffer) => {
-      if (arrayBuffer.byteLength === 0) return new ArrayBuffer(0)
-      const audioContext = new AudioContext()
-      const audioBuffer = await audioContext.decodeAudioData(arrayBuffer)
-      const wavBlob = await convertAudioBufferToWavBlob(audioBuffer)
-      const wavBuffer = await wavBlob.arrayBuffer()
-      return wavBuffer
-    })
+    const wavBuffer = await audioBlob
+      .arrayBuffer()
+      .then(async (arrayBuffer) => {
+        if (arrayBuffer.byteLength === 0) return new ArrayBuffer(0)
+        const audioContext = new AudioContext()
+        const audioBuffer = await audioContext.decodeAudioData(arrayBuffer)
+        const wavBlob = await convertAudioBufferToWavBlob(audioBuffer)
+        const wavBuffer = await wavBlob.arrayBuffer()
+        return wavBuffer
+      })
+      .catch(() => {
+        return new ArrayBuffer(0)
+      })
+
+    if (!wavBuffer) return
 
     setState(ResultState.UPLOADING)
     await window.electron.ipcRenderer
