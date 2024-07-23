@@ -8,11 +8,7 @@ import { Auth, killScriptSubprocess, matchDeepLink } from './utils'
 import { update } from './update'
 
 let scriptSubprocess: ChildProcessWithoutNullStreams | null
-let auth: Auth = is.dev
-  ? matchDeepLink(
-      'sniive://space0190dfd2x6da8x7000xbff7x44d8b7471c4c?access=eyJhbGciOiJkaXIiLCJlbmMiOiJBMjU2Q0JDLUhTNTEyIiwia2lkIjoic284N1hYQzl2WXc4d2l4SE4zb3lvNGR2d1FRbTc3MWFZN25tX05OS2IxeDFiMERqX3p5LTNFekR5VDdKeklXTlpEM2dtNHRMcXoyRjF4Y0w4WlUweFEifQ..h_LmpVIOq58jfiu8_KETHQ.GwVBLu6G8tjYQ3GJL8hY6yEzxZjDuS2emBEbpiQHrVN9UUAHDULFKFRb0bo3Uckg-fTEoxzb9YA8dLaIcpM-B5oL-25R2HHMvWL6ScoHK7ihZb6CbgWh-zKuK0WWrSNogDZnzSb6-mwZSkytRhyJtWN0DD9f9UfUtMbsiVkWTZ9lR6UE16naMb308uPT5jurhN7P0f8C_HjqpBonuH69yz2c2VHir-RGtTq1xpme1D1ZLgCIG04m-5N3uKB94LmVFl9gDxaOmDVf1sMtFRxrN6e__uGjt9wCqPPlUs1OsCCyiNfID35pI1uxpquoSVK13IvCpr-se05ViQlBGEEDmU6PG-qLzHxWe_pm1llT2UsKT7wkqoekIoyu0Dx78Tf3r6Xqwsj_BDlTl-ft_p33rnj1EpJuZaNj97dpYeGjvAwa4fRgU3XwI4HRzLvFToQj8taN8XGwZ5SUuqB8KrPTg7NxQqF_sgfLUctioAunQegs_HdGu7SYMR5fSyghmKK_6unUlEyhwLZD_SLSu-RNUmTY82oBvwo42DjPOTNmasfY_mmtZ72gReI6UCk-kQm7FJS5Oqq6e7fijAcN7RKYmbMn6zIbLw2TFwVEDjaLw3vxfQLhFt3nKqqcX7bkhy-vB0tiRVqpwIFZuelj8LAtEA.Pxuxfsi7Ju8V1jZZWDevnsj19tA_Yk1ZZ_cPlad79ug'
-    )
-  : { spaceName: '', access: '' }
+let auth: Auth = is.dev ? matchDeepLink('') : { spaceName: '', access: '' }
 
 // Register the protocol for sniive://
 if (process.defaultApp) {
