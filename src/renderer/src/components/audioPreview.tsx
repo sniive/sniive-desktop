@@ -9,6 +9,8 @@ import {
 
 import sniive from '@renderer/assets/sniive.svg'
 import { createSoundDetector } from '@renderer/lib/createSoundDetector'
+import { useGlobalStore } from '@renderer/globalStore'
+import { getText } from '@renderer/lib/locales'
 
 export type AudioPreviewProps = {
   isRecording: boolean
@@ -24,6 +26,7 @@ export function AudioPreview({
   updateInfo
 }: AudioPreviewProps) {
   const [audioLevel, setAudioLevel] = useState<number>(0)
+  const { locale } = useGlobalStore(({ locale }) => ({ locale }))
 
   useEffect(() => {
     if (!audioStream) return
@@ -58,21 +61,21 @@ export function AudioPreview({
             <TooltipTrigger asChild>
               <img
                 src={sniive}
-                alt="sniive"
+                alt="Sniive"
                 className="h-5 py-0.5 z-10 animate-pulse cursor-pointer"
               />
             </TooltipTrigger>
             <TooltipContent>
               <p className="text-xs leading-tight">
-                <b>Update available.</b>
+                <b>{getText(locale, 'updateAvailable')}</b>
                 <br />
-                <i>Restart to apply</i>
+                <i>{getText(locale, 'restartToApply')}</i>
               </p>
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
       ) : (
-        <img src={sniive} alt="sniive" className="h-5 py-0.5 z-10" />
+        <img src={sniive} alt="Sniive" className="h-5 py-0.5 z-10" />
       )}
     </div>
   )

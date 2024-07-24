@@ -1,3 +1,4 @@
+import { DesktopCapturerSource } from 'electron'
 import { create } from 'zustand'
 
 type Metadata = Partial<{
@@ -13,8 +14,10 @@ type GlobalStoreState = {
   metadata: Metadata | null
   setRecordingStartTime: (recordingStartTime: number) => void
   setRecordingEndTime: (recordingEndTime: number) => void
-  displayId: string
-  setDisplayId: (displayId: string) => void
+  display: DesktopCapturerSource | null
+  setDisplay: (display: DesktopCapturerSource | null) => void
+  locale: string | undefined
+  setLocale: (locale: string | undefined) => void
 }
 
 export const useGlobalStore = create<GlobalStoreState>((set, get) => ({
@@ -27,6 +30,8 @@ export const useGlobalStore = create<GlobalStoreState>((set, get) => ({
     set({ metadata: { ...get().metadata, recordingStartTime } }),
   setRecordingEndTime: (recordingEndTime) =>
     set({ metadata: { ...get().metadata, recordingEndTime } }),
-  displayId: '',
-  setDisplayId: (displayId) => set({ displayId })
+  display: null,
+  setDisplay: (display) => set({ display }),
+  locale: undefined,
+  setLocale: (locale) => set({ locale })
 }))

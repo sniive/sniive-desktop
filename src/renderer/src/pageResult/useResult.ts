@@ -26,7 +26,7 @@ export function useResult(): UseResultReturn {
   useEffect(() => {
     window.electron.ipcRenderer.invoke('resize', {
       width: 300,
-      height: 80
+      height: 84
     })
 
     window.electron.ipcRenderer.on('uploadProgress', (_: IpcRendererEvent, progress: number) => {

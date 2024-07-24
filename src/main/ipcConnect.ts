@@ -7,7 +7,8 @@ import {
   desktopCapturer,
   ipcMain,
   Notification,
-  systemPreferences
+  systemPreferences,
+  screen
 } from 'electron'
 import { join } from 'path'
 import {
@@ -36,7 +37,7 @@ export function connectIpc({
   auth,
   app
 }: ConnectIpcParams) {
-  ipcMain.handle('scriptStart', async (_, id: string) => {
+  ipcMain.handle('scriptStart', async (_, displayString: string) => {
     if (scriptSubprocess === null || scriptSubprocess === undefined) {
       try {
         const extension = process.platform === 'win32' ? 'exe' : 'bin'
@@ -44,11 +45,45 @@ export function connectIpc({
           'app.asar',
           'app.asar.unpacked'
         )
-        if (process.platform === 'linux') {
-          scriptSubprocess = spawn(scriptPath)
-        } else {
-          scriptSubprocess = spawn(scriptPath, [id])
+
+        // eslint-disable-next-line no-inner-declarations
+        function startSubprocess() {
+          if (process.platform === 'linux') {
+            return spawn(scriptPath)
+          }
+          const display: DesktopCapturerSource = JSON.parse(displayString)
+
+          if (display.id.startsWith('window')) {
+            const id = display.id.split(':')[1]
+            return spawn(scriptPath, ['window', id])
+          }
+
+          if (display.id.startsWith('screen')) {
+            const referenceDisplay = screen
+              .getAllDisplays()
+              .find((disp) => disp.id.toString() === display.display_id)
+            if (referenceDisplay) {
+              const {
+                scaleFactor,
+                nativeOrigin: { x: originX, y: originY },
+                bounds: { x, y, width, height }
+              } = referenceDisplay
+              const rect = {
+                top: originX + x * scaleFactor,
+                left: originY + y * scaleFactor,
+                right: originX + (x + width) * scaleFactor,
+                bottom: originY + (y + height) * scaleFactor
+              }
+              // turn rect into a string of the form "left-top-right-bottom"
+              const rectStr = [rect.left, rect.top, rect.right, rect.bottom].join('-')
+              return spawn(scriptPath, ['screen', rectStr])
+            }
+          }
+
+          return spawn(scriptPath)
         }
+
+        scriptSubprocess = startSubprocess()
         scriptSubprocess.stdout.on('data', (data) => {
           mainWindow.webContents.send('scriptData', data.toString())
         })
@@ -124,6 +159,8 @@ export function connectIpc({
     if (is.dev) return true
     return auth.access !== '' && auth.spaceName !== ''
   })
+
+  ipcMain.handle('getLocale', async () => auth.locale)
 
   ipcMain.handle('handleCapture', async (_, capture: { base64Image: string; data: string }) => {
     const uploadLink = await getUploadLink({ ...auth, fileExtension: 'json' })

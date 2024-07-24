@@ -15,7 +15,7 @@ export function useVideo(): UseVideoReturn {
   const [videoStream, setVideoStream] = useState<MediaStream | null>(null)
   const [imageCapture, setImageCapture] = useState<ImageCapture | null>(null)
 
-  const { setDisplayId } = useGlobalStore(({ setDisplayId }) => ({ setDisplayId }))
+  const { setDisplay } = useGlobalStore(({ setDisplay }) => ({ setDisplay }))
 
   const startVideoStream = async (source: DesktopCapturerSource): Promise<void> =>
     await navigator.mediaDevices
@@ -55,11 +55,7 @@ export function useVideo(): UseVideoReturn {
       if (!access) return null
       const source: DesktopCapturerSource | null =
         await window.electron.ipcRenderer.invoke('getVideoRecordingSource')
-      if (source) {
-        setDisplayId(source.id)
-      } else {
-        setDisplayId('')
-      }
+      setDisplay(source)
       return source
     })
 

@@ -49,16 +49,15 @@ export function useRecording({
   const navigate = useNavigate()
 
   const [isRecording, setIsRecording] = useState<boolean>(false)
-  const { isAuth, setIsAuth, setRecordingStartTime, setRecordingEndTime, displayId } =
-    useGlobalStore(
-      ({ isAuth, setIsAuth, setRecordingStartTime, setRecordingEndTime, displayId }) => ({
-        isAuth,
-        setIsAuth,
-        setRecordingStartTime,
-        setRecordingEndTime,
-        displayId
-      })
-    )
+  const { isAuth, setIsAuth, setRecordingStartTime, setRecordingEndTime, display } = useGlobalStore(
+    ({ isAuth, setIsAuth, setRecordingStartTime, setRecordingEndTime, display }) => ({
+      isAuth,
+      setIsAuth,
+      setRecordingStartTime,
+      setRecordingEndTime,
+      display
+    })
+  )
 
   const recordingDisabled = useMemo(() => {
     return imageCapture === null || !isAuth
@@ -67,14 +66,14 @@ export function useRecording({
   const startRecording = useCallback(async () => {
     if (recordingDisabled) return
 
-    if (await window.electron.ipcRenderer.invoke('scriptStart', displayId)) {
+    if (await window.electron.ipcRenderer.invoke('scriptStart', JSON.stringify(display))) {
       audioRecorder?.start(200)
       setRecordingStartTime(Date.now())
       return setIsRecording(true)
     }
 
     setIsRecording(false)
-  }, [audioRecorder, recordingDisabled, displayId])
+  }, [audioRecorder, recordingDisabled, display])
 
   const stopRecording = useCallback(async () => {
     if (recordingDisabled) return

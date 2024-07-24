@@ -7,17 +7,19 @@ const domain = is.dev ? 'http://localhost:3000' : 'https://sniive.com'
 export interface Auth {
   spaceName: string
   access: string
+  locale?: string
 }
 
 export function matchDeepLink(link: string): Auth {
-  const regex = /sniive:\/\/(.+)\?access=(.+)/
+  const regex = /sniive:\/\/(.+)\?access=(.+)&locale=(.+)/
   const match = link.match(regex)
-  if (match && match.length === 3) {
+  if (match && match.length === 4) {
     const spaceName = decodeURI(match[1]).replace(/[/\\]/g, '')
     const access = match[2]
-    return { spaceName, access }
+    const locale = match[3]
+    return { spaceName, access, locale }
   }
-  return { spaceName: '', access: '' }
+  return { spaceName: '', access: '', locale: '' }
 }
 
 export function killScriptSubprocess(

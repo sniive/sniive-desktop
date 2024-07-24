@@ -25,7 +25,6 @@ export function RecordButton({
           'bg-red-500 hover:bg-red-600 outline-red-500 hover:outline-red-600 animate-pulse duration-700'
       )}
       onClick={() => (isRecording ? stopRecording() : startRecording())}
-      aria-label={isRecording ? 'Stop Recording' : 'Start Recording'}
       disabled={isDisabled}
     />
   )

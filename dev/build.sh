@@ -1,11 +1,7 @@
 #!/usr/bin/env bash
 
 # On Windows, do :
-# cd .\dev\python\
-# pyenv global 3.11
-# poetry shell
-# python3 -m nuitka --standalone --onefile --output-dir=./output/ ./script.py
-# cp .\output\script.exe ..\..\resources\script.exe
+# cd .\dev\python\;pyenv global 3.11;poetry shell;python3 -m nuitka --standalone --onefile --output-dir=./output/ ./script.py;cp .\output\script.exe ..\..\resources\script.exe;cd ..\..
 
 #set "$(dirname "$0")" as variable (and add absolute path of the script)
 location="$(cd "$(dirname "$0")" && pwd)"

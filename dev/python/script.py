@@ -72,22 +72,17 @@ class BufferWithTime:
         self.buffer.append(event)
 
 class DisplayDevice:
-    def __init__(self, id: int, type: Literal["window", "screen"] | None):
+    def __init__(self, type: Literal["window", "screen"] | None, value: str | None):
         self.type: Literal["window", "screen"] | None = type
         self.display: pwc.Window | Rect | None = None
         try:
             if type == "window":
-                self.display = pwc.Window(id)
+                self.display = pwc.Window(int(value))
             elif type == "screen":
-                screens = pmc.getAllMonitors()
-                for screen in screens:
-                    if screen.get("id") == id:
-                        self.display = screen.get("workarea")
-                        return
-                if 0 <= id < len(screens):
-                    self.display = screens[id].get("workarea")
-                    return
-            raise ValueError("Invalid id")
+                # value should be a string of the form "left-top-right-bottom"
+                self.display = Rect(*[int(x) for x in value.split("-")])
+            else:
+                raise ValueError("Invalid id")
         except:
             self.type = None
             self.display = None
@@ -174,22 +169,8 @@ def on_release(key: Key | KeyCode | None):
     stateMachine.update(KeyEvent(key, False))
 
 
-def init_display_device(id: str | None) -> DisplayDevice:
-    if id is None:
-        return DisplayDevice(-1, None)
-
-    #id if of the form "window:<window_id>", or "screen:<screen_id>"
-    if id.startswith("window:"):
-        window_id = int(id.split(":")[1])
-        return DisplayDevice(window_id, "window")
-    elif id.startswith("screen:"):
-        screen_id = int(id.split(":")[1])
-        return DisplayDevice(screen_id, "screen")
-    
-    return DisplayDevice(-1, None)
-
-def start_recording(id: str | None = None):
-    display_device: DisplayDevice = init_display_device(id)
+def start_recording(type: str | None = None, value: str | None = None):
+    display_device: DisplayDevice = DisplayDevice(type, value)
     
     def on_click(_x: int, _y: int, button: Button, pressed: bool):
         display = display_device.get_display()
@@ -218,9 +199,11 @@ def start_recording(id: str | None = None):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser("sniive_script")
-    parser.add_argument("id", type=str, default=None, nargs="?")
+    parser.add_argument("type", type=str, default=None, nargs="?")
+    parser.add_argument("value", type=str, default=None, nargs="?")
     args = parser.parse_args()
     
-    id = args.id
-    start_recording(id)
+    type = args.type
+    value = args.value
+    start_recording(type, value)
     

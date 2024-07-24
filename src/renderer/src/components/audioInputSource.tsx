@@ -6,6 +6,8 @@ import {
   TooltipProvider,
   TooltipTrigger
 } from '@renderer/components/ui/tooltip'
+import { useGlobalStore } from '@renderer/globalStore'
+import { getText } from '@renderer/lib/locales'
 
 type AudioInputSourceProps = {
   isDisabled: boolean
@@ -14,6 +16,8 @@ type AudioInputSourceProps = {
 }
 
 export function AudioInputSource({ isDisabled, audioInput, setAudio }: AudioInputSourceProps) {
+  const { locale } = useGlobalStore(({ locale }) => ({ locale }))
+
   return (
     <TooltipProvider>
       <Tooltip>
@@ -27,8 +31,8 @@ export function AudioInputSource({ isDisabled, audioInput, setAudio }: AudioInpu
             {audioInput
               ? audioInput.label
                 ? audioInput.label
-                : 'Unknown'
-              : 'No audio source selected'}
+                : getText(locale, 'audioInputUnknown')
+              : getText(locale, 'audioInputNoSource')}
           </p>
         </TooltipContent>
       </Tooltip>

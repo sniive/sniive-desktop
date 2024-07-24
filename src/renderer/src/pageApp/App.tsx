@@ -11,6 +11,8 @@ import { useVideo } from './useVideo'
 import { useAudio } from './useAudio'
 import { useRecording } from './useRecording'
 import { useUpdate } from './useUpdate'
+import { useGlobalStore } from '@renderer/globalStore'
+import { useEffect } from 'react'
 
 function App(): JSX.Element {
   const { updateInfo } = useUpdate()
@@ -21,6 +23,10 @@ function App(): JSX.Element {
     imageCapture,
     stopAudio,
     stopVideo
+  })
+  const { setLocale } = useGlobalStore(({ setLocale }) => ({ setLocale }))
+  useEffect(() => {
+    window.electron.ipcRenderer.invoke('getLocale').then(setLocale)
   })
 
   return (

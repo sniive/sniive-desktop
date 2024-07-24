@@ -7,6 +7,8 @@ import {
   TooltipTrigger
 } from '@renderer/components/ui/tooltip'
 import { DesktopCapturerSource } from 'electron'
+import { useGlobalStore } from '@renderer/globalStore'
+import { getText } from '@renderer/lib/locales'
 
 type VideoInputSourceProps = {
   isDisabled: boolean
@@ -15,6 +17,8 @@ type VideoInputSourceProps = {
 }
 
 export function VideoInputSource({ isDisabled, videoInput, setVideo }: VideoInputSourceProps) {
+  const { locale } = useGlobalStore(({ locale }) => ({ locale }))
+
   return (
     <TooltipProvider>
       <Tooltip>
@@ -29,8 +33,8 @@ export function VideoInputSource({ isDisabled, videoInput, setVideo }: VideoInpu
               ? videoInput.name ||
                 videoInput.display_id ||
                 videoInput.id ||
-                'Limited support - unknown source'
-              : 'No video source selected'}
+                getText(locale, 'videoInputUnknown')
+              : getText(locale, 'videoInputNoSource')}
           </p>
         </TooltipContent>
       </Tooltip>
