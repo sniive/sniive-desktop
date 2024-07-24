@@ -44,11 +44,7 @@ export function connectIpc({
           'app.asar',
           'app.asar.unpacked'
         )
-        if (process.platform === 'linux') {
-          scriptSubprocess = spawn(scriptPath)
-        } else {
-          scriptSubprocess = spawn(scriptPath, [id])
-        }
+        scriptSubprocess = spawn(scriptPath, [id])
         scriptSubprocess.stdout.on('data', (data) => {
           mainWindow.webContents.send('scriptData', data.toString())
         })

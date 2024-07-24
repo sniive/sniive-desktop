@@ -79,12 +79,14 @@ class DisplayDevice:
             if type == "window":
                 self.display = pwc.Window(id)
             elif type == "screen":
-                screens = pmc.getAllMonitorsDict()
-                for screen_name in screens:
-                    screen = screens[screen_name]
+                screens = pmc.getAllMonitors()
+                for screen in screens:
                     if screen.get("id") == id:
                         self.display = screen.get("workarea")
-                        break
+                        return
+                if 0 <= id < len(screens):
+                    self.display = screens[id].get("workarea")
+                    return
         except:
             self.type = None
             self.display = None
