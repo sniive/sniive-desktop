@@ -24,10 +24,22 @@ function App(): JSX.Element {
     stopAudio,
     stopVideo
   })
-  const { setLocale } = useGlobalStore(({ setLocale }) => ({ setLocale }))
+  const { setLocale, locale } = useGlobalStore(({ setLocale, locale }) => ({ setLocale, locale }))
   useEffect(() => {
-    window.electron.ipcRenderer.invoke('getLocale').then(setLocale)
-  })
+    // while locale is undefined, fetch it every second
+    let interval: NodeJS.Timeout
+    if (!locale) {
+      interval = setInterval(() => {
+        window.electron.ipcRenderer.invoke('getLocale').then((locale: string | undefined) => {
+          if (locale) {
+            setLocale(locale)
+            clearInterval(interval)
+          }
+        })
+      }, 1000)
+    }
+    return () => clearInterval(interval)
+  }, [locale])
 
   return (
     <main className="min-w-screen bg-background antialiased rounded-lg flex flex-col items-center justify-center overflow-hidden border -outline-offset-1">
