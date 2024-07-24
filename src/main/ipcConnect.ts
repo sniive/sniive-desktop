@@ -160,7 +160,10 @@ export function connectIpc({
     return auth.access !== '' && auth.spaceName !== ''
   })
 
-  ipcMain.handle('getLocale', async () => auth.locale)
+  ipcMain.handle('getLocale', async () => {
+    console.log('getLocale', auth.locale)
+    return auth.locale
+  })
 
   ipcMain.handle('handleCapture', async (_, capture: { base64Image: string; data: string }) => {
     const uploadLink = await getUploadLink({ ...auth, fileExtension: 'json' })

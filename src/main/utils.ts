@@ -11,12 +11,12 @@ export interface Auth {
 }
 
 export function matchDeepLink(link: string): Auth {
-  const regex = /sniive:\/\/(.+)\?access=(.+)&locale=(.+)/
+  const regex = /sniive:\/\/(.+)\/(.+)\?access=(.+)/
   const match = link.match(regex)
   if (match && match.length === 4) {
     const spaceName = decodeURI(match[1]).replace(/[/\\]/g, '')
-    const access = match[2]
-    const locale = match[3]
+    const access = match[3]
+    const locale = match[2]
     return { spaceName, access, locale }
   }
   return { spaceName: '', access: '', locale: '' }
