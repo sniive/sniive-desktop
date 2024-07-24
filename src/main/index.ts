@@ -40,9 +40,9 @@ if (!gotTheLock) {
     })
 
     if (process.argv.length >= 2 && process.platform !== 'darwin') {
-      const { spaceName, access } = matchDeepLink(process.argv[1])
+      const { spaceName, access, locale } = matchDeepLink(process.argv[1])
       if (spaceName && access) {
-        auth = { spaceName, access }
+        auth = { spaceName, access, locale }
       }
     }
 
@@ -58,10 +58,10 @@ if (!gotTheLock) {
       }
       // the commandLine is array of strings in which last element is deep link url
       if (commandLine && commandLine.length >= 2 && process.platform !== 'darwin') {
-        const { spaceName, access } = matchDeepLink(process.argv[1])
+        const { spaceName, access, locale } = matchDeepLink(process.argv[1])
         auth = matchDeepLink(commandLine[commandLine.length - 1])
         if (spaceName && access) {
-          auth = { spaceName, access }
+          auth = { spaceName, access, locale }
         }
       }
     })
@@ -89,9 +89,9 @@ if (!gotTheLock) {
 
   app.on('open-url', (_, url: string) => {
     if (process.platform === 'darwin') {
-      const { spaceName, access } = matchDeepLink(url)
+      const { spaceName, access, locale } = matchDeepLink(url)
       if (spaceName && access) {
-        auth = { spaceName, access }
+        auth = { spaceName, access, locale }
       }
     }
   })
