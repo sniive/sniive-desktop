@@ -87,6 +87,7 @@ class DisplayDevice:
                 if 0 <= id < len(screens):
                     self.display = screens[id].get("workarea")
                     return
+            raise ValueError("Invalid id")
         except:
             self.type = None
             self.display = None
