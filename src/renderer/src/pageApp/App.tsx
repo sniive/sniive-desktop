@@ -12,7 +12,7 @@ import { useAudio } from './useAudio'
 import { useRecording } from './useRecording'
 import { useUpdate } from './useUpdate'
 import { useGlobalStore } from '@renderer/globalStore'
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 
 function App(): JSX.Element {
   const { updateInfo } = useUpdate()
@@ -25,13 +25,16 @@ function App(): JSX.Element {
     stopVideo
   })
   const { setLocale, locale } = useGlobalStore(({ setLocale, locale }) => ({ setLocale, locale }))
+  const getLocaleTriesRef = useRef<number>(0)
+
   useEffect(() => {
     // while locale is undefined, fetch it every second
     let interval: NodeJS.Timeout
     if (!locale) {
       interval = setInterval(() => {
         window.electron.ipcRenderer.invoke('getLocale').then((locale: string | undefined) => {
-          if (locale) {
+          getLocaleTriesRef.current += 1
+          if (locale || getLocaleTriesRef.current > 5) {
             setLocale(locale)
             clearInterval(interval)
           }

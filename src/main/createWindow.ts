@@ -35,7 +35,7 @@ export function createWindow(): BrowserWindow {
     }
   })
 
-  new Tray(nativeImage.createFromPath(appIcon))
+  if (process.platform !== 'darwin') new Tray(nativeImage.createFromPath(appIcon))
 
   mainWindow.on('ready-to-show', () => {
     mainWindow.show()

@@ -50,14 +50,12 @@ export function useVideo(): UseVideoReturn {
         setImageCapture(null)
       })
 
-  const getVideoDevices = async (): Promise<DesktopCapturerSource | null> =>
-    window.electron.ipcRenderer.invoke('getScreenAccess').then(async (access: boolean) => {
-      if (!access) return null
-      const source: DesktopCapturerSource | null =
-        await window.electron.ipcRenderer.invoke('getVideoRecordingSource')
-      setDisplay(source)
-      return source
-    })
+  const getVideoDevices = async (): Promise<DesktopCapturerSource | null> => {
+    const source: DesktopCapturerSource | null =
+      await window.electron.ipcRenderer.invoke('getVideoRecordingSource')
+    setDisplay(source)
+    return source
+  }
 
   const setVideo = async () =>
     await getVideoDevices()

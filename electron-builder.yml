@@ -29,8 +29,6 @@ nsis:
   createDesktopShortcut: always
 mac:
   entitlementsInherit: build/entitlements.mac.plist
-  extendInfo:
-    - NSMicrophoneUsageDescription: Application requests access to the device's microphone.
   notarize: false
 dmg:
   artifactName: ${name}-${version}.${ext}

@@ -21,6 +21,11 @@ import {
   runTutorial
 } from './utils'
 import axios from 'axios'
+import {
+  hasPromptedForPermission,
+  hasScreenCapturePermission,
+  openSystemPreferences
+} from 'mac-screen-capture-permissions'
 
 type ConnectIpcParams = {
   mainWindow: BrowserWindow
@@ -85,6 +90,7 @@ export function connectIpc({
 
         scriptSubprocess = startSubprocess()
         scriptSubprocess.stdout.on('data', (data) => {
+          console.log(data.toString())
           mainWindow.webContents.send('scriptData', data.toString())
         })
         scriptSubprocess.stderr.on('data', (data) => {
@@ -118,6 +124,14 @@ export function connectIpc({
   ipcMain.handle('getVideoRecordingSource', async (): Promise<DesktopCapturerSource | null> => {
     // if platform is linux, return null
     const types: ('screen' | 'window')[] = ['screen', 'window']
+
+    if (process.platform === 'darwin') {
+      if (!hasScreenCapturePermission()) {
+        if (hasPromptedForPermission()) {
+          await openSystemPreferences()
+        }
+      }
+    }
 
     return await desktopCapturer
       .getSources({ types })

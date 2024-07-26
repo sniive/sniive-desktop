@@ -8,5 +8,11 @@
     <true/>
     <key>com.apple.security.cs.allow-dyld-environment-variables</key>
     <true/>
+    <key>NSMicrophoneUsageDescription</key>
+	  <string>Sniive uses this permission to record your audio for screencasts</string>
+    <key>com.apple.security.device.microphone</key>
+    <true/>
+    <key>com.apple.security.network.client</key>
+    <true/>
   </dict>
 </plist>
