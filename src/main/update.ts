@@ -1,7 +1,7 @@
 import { app } from 'electron'
 import { autoUpdater } from 'electron-updater'
 
-export async function update(win: Electron.BrowserWindow) {
+export async function update(win: Electron.BrowserWindow, updateDownloaded: boolean) {
   autoUpdater.autoDownload = true
 
   if (!app.isPackaged) {
@@ -31,6 +31,9 @@ export async function update(win: Electron.BrowserWindow) {
   })
   autoUpdater.on('update-downloaded', (info) => {
     console.log('Update downloaded', info)
+    if (!updateDownloaded) {
+      updateDownloaded = true
+    }
   })
 
   await autoUpdater.checkForUpdatesAndNotify()

@@ -145,7 +145,7 @@ export async function runTutorial({
     headers: {
       'Content-Type': 'application/json'
     },
-    body: JSON.stringify({ access, metadata })
+    body: JSON.stringify({ access, metadata: { ...metadata, platform: process.platform } })
   })
     .then((res) => res.json())
     .catch((error) => {

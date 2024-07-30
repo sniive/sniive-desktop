@@ -8,7 +8,8 @@ import { Auth, killScriptSubprocess, matchDeepLink } from './utils'
 import { update } from './update'
 
 let scriptSubprocess: ChildProcessWithoutNullStreams | null
-let auth: Auth = matchDeepLink('sniive://test/fr?access=test')
+let updateDownloaded: boolean = false
+let auth: Auth = is.dev ? matchDeepLink('') : { spaceName: '', access: '' }
 
 // Register the protocol for sniive://
 if (process.defaultApp) {
@@ -47,7 +48,7 @@ if (!gotTheLock) {
     }
 
     const mainWindow = createWindow()
-    update(mainWindow)
+    update(mainWindow, updateDownloaded)
     connectIpc({ mainWindow, scriptSubprocess, killScriptSubprocess, auth, app })
 
     app.on('second-instance', (_, commandLine: string[]) => {
@@ -71,9 +72,15 @@ if (!gotTheLock) {
       // dock icon is clicked and there are no other windows open.
       if (BrowserWindow.getAllWindows().length === 0) createWindow()
     })
-  })
 
-  app.on('before-quit', () => killScriptSubprocess(scriptSubprocess))
+    app.on('before-quit', () => {
+      killScriptSubprocess(scriptSubprocess)
+      if (updateDownloaded) {
+        mainWindow?.minimize()
+        updateDownloaded = false
+      }
+    })
+  })
   app.on('will-quit', () => killScriptSubprocess(scriptSubprocess))
 
   // Quit when all windows are closed, except on macOS. There, it's common

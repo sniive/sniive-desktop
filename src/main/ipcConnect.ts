@@ -46,14 +46,17 @@ export function connectIpc({
     if (scriptSubprocess === null || scriptSubprocess === undefined) {
       try {
         const extension = process.platform === 'win32' ? 'exe' : 'bin'
-        const scriptPath = join(__dirname, `../../resources/script.${extension}`).replace(
-          'app.asar',
-          'app.asar.unpacked'
-        )
+        const scriptPath =
+          process.platform === 'darwin'
+            ? '/Applications/sniive-script.app/Contents/MacOS/sniive-script'
+            : join(__dirname, `../../resources/script.${extension}`).replace(
+                'app.asar',
+                'app.asar.unpacked'
+              )
 
         // eslint-disable-next-line no-inner-declarations
         function startSubprocess() {
-          if (process.platform === 'linux') {
+          if (process.platform === 'linux' || process.platform === 'darwin') {
             return spawn(scriptPath)
           }
           const display: DesktopCapturerSource = JSON.parse(displayString)
