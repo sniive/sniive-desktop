@@ -129,10 +129,9 @@ export function connectIpc({
     const types: ('screen' | 'window')[] = ['screen', 'window']
 
     if (process.platform === 'darwin') {
-      if (!hasScreenCapturePermission()) {
-        if (hasPromptedForPermission()) {
-          await openSystemPreferences()
-        }
+      const prompted = hasPromptedForPermission()
+      if (!hasScreenCapturePermission() && prompted) {
+        await openSystemPreferences()
       }
     }
 
