@@ -16,3 +16,6 @@ create-dmg \
   --app-drop-link 425 120 \
   "python/dist/sniive-script.dmg" \
   "python/dist/dmg/"
+
+rm -rf python/dist/dmg 
+cp python/dist/sniive-script.dmg python/output/sniive-script.dmg

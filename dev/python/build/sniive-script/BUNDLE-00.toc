@@ -1,0 +1,3 @@
+([('sniive-script',
+   '/Users/m1/Desktop/sniive-desktop/dev/python/dist/sniive-script',
+   'EXECUTABLE')],)
