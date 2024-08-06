@@ -93,7 +93,6 @@ export function connectIpc({
 
         scriptSubprocess = startSubprocess()
         scriptSubprocess.stdout.on('data', (data) => {
-          console.log(data.toString())
           mainWindow.webContents.send('scriptData', data.toString())
         })
         scriptSubprocess.stderr.on('data', (data) => {
@@ -177,7 +176,6 @@ export function connectIpc({
   })
 
   ipcMain.handle('getLocale', async () => {
-    console.log('getLocale', auth.locale)
     return auth.locale
   })
 
