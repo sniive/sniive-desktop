@@ -57,9 +57,9 @@ pub fn run() {
         ])
         .setup(|app| {
             let app_handle: &'static tauri::AppHandle = APP_HANDLE.init(app.handle().clone());
-            async_runtime::spawn(async move { upload_controller(app_handle, async_ic2uc_rx).await });
-            async_runtime::spawn(async move { input_controller(app_handle, async_il2ic_rx, async_ic2uc_tx).await });
-            async_runtime::spawn(async move { audio_controller(app_handle, async_ta2ac_rx).await });
+            async_runtime::spawn(async move { upload_controller(app_handle, async_ic2uc_rx).await.unwrap() });
+            async_runtime::spawn(async move { input_controller(app_handle, async_il2ic_rx, async_ic2uc_tx).await.unwrap() });
+            async_runtime::spawn(async move { audio_controller(app_handle, async_ta2ac_rx).await.unwrap() });
 
             app_cli_handler(app_handle);
 

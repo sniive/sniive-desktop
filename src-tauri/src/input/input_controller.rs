@@ -1,8 +1,7 @@
 use std::time::Duration;
-
+use active_win_pos_rs::get_active_window;
 use crabgrab::{
-    frame::VideoFrame,
-    prelude::{take_screenshot, CaptureConfig, CapturePixelFormat},
+    frame::VideoFrame, platform::windows::WindowsCapturableWindowExt, prelude::{take_screenshot, CaptureConfig, CapturePixelFormat}
 };
 use tauri::{AppHandle, Manager};
 use tokio::{
@@ -45,6 +44,16 @@ pub async fn input_controller(
 
         let capture_config = match capturable_surface {
             CapturableSurface::CapturableWindow(window) => {
+                match get_active_window() {
+                    Ok(active_window) => {
+                        let formatted_id = format!("HWND({:?})", window.get_window_handle().0);
+                        if active_window.window_id != formatted_id {
+                            continue;
+                        }
+                    },
+                    Err(()) => { continue }
+                };
+                
                 match input_event.event {
                     rdev::EventType::ButtonPress(_) => {
                         if !is_in(
