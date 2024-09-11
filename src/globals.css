@@ -3,28 +3,33 @@
 @tailwind utilities;
 
 @font-face {
-  font-family: 'circular-std';
+  font-family: "circular-std";
   src:
-    url(./lib/fonts/circularStd/CircularStd-Black.woff2) format('woff2') font-weight-black,
-    url(./lib/fonts/circularStd/CircularStd-BlackItalic.woff2) format('woff2') font-weight-black
-      font-style-italic,
-    url(./lib/fonts/circularStd/CircularStd-Bold.woff2) format('woff2') font-weight-bold,
-    url(./lib/fonts/circularStd/CircularStd-BoldItalic.woff2) format('woff2') font-weight-bold
-      font-style-italic,
-    url(./lib/fonts/circularStd/CircularStd-Book.woff2) format('woff2') font-weight-normal,
-    url(./lib/fonts/circularStd/CircularStd-BookItalic.woff2) format('woff2') font-weight-normal
-      font-style-italic,
-    url(./lib/fonts/circularStd/CircularStd-Medium.woff2) format('woff2') font-weight-medium,
-    url(./lib/fonts/circularStd/CircularStd-MediumItalic.woff2) format('woff2') font-weight-medium
-      font-style-italic,
-    url(./lib/fonts/circularStd/CircularStd-Light.woff2) format('woff2') font-weight-light,
-    url(./lib/fonts/circularStd/CircularStd-LightItalic.woff2) format('woff2') font-weight-light
-      font-style-italic;
+    url(./lib/fonts/circularStd/CircularStd-Black.woff2) format("woff2")
+      font-weight-black,
+    url(./lib/fonts/circularStd/CircularStd-BlackItalic.woff2) format("woff2")
+      font-weight-black font-style-italic,
+    url(./lib/fonts/circularStd/CircularStd-Bold.woff2) format("woff2")
+      font-weight-bold,
+    url(./lib/fonts/circularStd/CircularStd-BoldItalic.woff2) format("woff2")
+      font-weight-bold font-style-italic,
+    url(./lib/fonts/circularStd/CircularStd-Book.woff2) format("woff2")
+      font-weight-normal,
+    url(./lib/fonts/circularStd/CircularStd-BookItalic.woff2) format("woff2")
+      font-weight-normal font-style-italic,
+    url(./lib/fonts/circularStd/CircularStd-Medium.woff2) format("woff2")
+      font-weight-medium,
+    url(./lib/fonts/circularStd/CircularStd-MediumItalic.woff2) format("woff2")
+      font-weight-medium font-style-italic,
+    url(./lib/fonts/circularStd/CircularStd-Light.woff2) format("woff2")
+      font-weight-light,
+    url(./lib/fonts/circularStd/CircularStd-LightItalic.woff2) format("woff2")
+      font-weight-light font-style-italic;
 }
 
 @layer base {
   :root {
-    --font-sans: 'circular-std', sans-serif;
+    --font-sans: "circular-std", sans-serif;
 
     --background: 0 0% 100%;
     --foreground: 240 10% 3.9%;
@@ -75,6 +80,7 @@
   }
 }
 
-html, body {
+html,
+body {
   overflow: hidden;
 }

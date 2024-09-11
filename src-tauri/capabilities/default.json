@@ -25,7 +25,7 @@
     "core:event:allow-unlisten",
 
     "shell:allow-open",
-    
+
     "cli:default"
   ]
 }

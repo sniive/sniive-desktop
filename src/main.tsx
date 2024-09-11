@@ -1,9 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import {
-  createBrowserRouter,
-  RouterProvider,
-} from "react-router-dom";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import "./globals.css";
 import AppMain from "./AppMain";
 import AppSelectSurface from "./AppSelectSurface";
@@ -31,7 +28,7 @@ const router = createBrowserRouter([
   {
     path: "/result",
     element: <AppResult />,
-  }
+  },
 ]);
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(

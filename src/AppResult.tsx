@@ -6,45 +6,46 @@ import { useAppStore } from "./state";
 import { getText } from "./lib/locales";
 
 export function AppResult() {
-  const [loading, setLoading] = useState<boolean>(false)
-  const [success, setSuccess] = useState<boolean>(false)
+  const [loading, setLoading] = useState<boolean>(false);
+  const [success, setSuccess] = useState<boolean>(false);
 
-  const { locale } = useAppStore(({ locale }) => ({ locale }))
+  const { locale } = useAppStore(({ locale }) => ({ locale }));
 
   const handleSubmit = async () => {
-    setLoading(true)
-    invoke<boolean>('finish_recording')
+    setLoading(true);
+    invoke<boolean>("finish_recording")
       .then(async (res) => {
         if (!res) {
-          setLoading(false)
-          return
+          setLoading(false);
+          return;
         }
-        setSuccess(true)
+        setSuccess(true);
         setTimeout(async () => {
-          await getCurrentWindow().close()
+          await getCurrentWindow().close();
         }, 2000);
       })
       .catch(() => {
-        setLoading(false)
-      })
-  }
+        setLoading(false);
+      });
+  };
 
   const handleCancel = async () => {
-    await getCurrentWindow().close()
-  }
+    await getCurrentWindow().close();
+  };
 
   return (
     <main className="bg-background w-scren h-screen antialiased rounded-lg flex flex-col items-center overflow-hidden font-sans select-none">
-      <header className="w-full flex items-center justify-center h-10" data-tauri-drag-region>
+      <header
+        className="w-full flex items-center justify-center h-10"
+        data-tauri-drag-region
+      >
         <span className="font-bold" data-tauri-drag-region>
-          {getText(locale, 'results')}
+          {getText(locale, "results")}
         </span>
       </header>
       <div className="w-full flex-1 relative flex flex-row items-center justify-center pb-1">
         {success ? (
-          <span className="text-sm">
-            {getText(locale, 'resultsDone')}
-          </span>
+          <span className="text-sm">{getText(locale, "resultsDone")}</span>
         ) : (
           <div className="grid grid-cols-2 gap-2">
             <Button
@@ -54,7 +55,7 @@ export function AppResult() {
               onClick={handleSubmit}
               disabled={loading}
             >
-              {getText(locale, 'resultsSubmit')}
+              {getText(locale, "resultsSubmit")}
             </Button>
             <Button
               variant="outline"
@@ -63,11 +64,11 @@ export function AppResult() {
               onClick={handleCancel}
               disabled={loading}
             >
-              {getText(locale, 'resultsCancel')}
+              {getText(locale, "resultsCancel")}
             </Button>
           </div>
         )}
       </div>
     </main>
-  )
+  );
 }
