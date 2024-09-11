@@ -1,0 +1,31 @@
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "default",
+  "description": "Capability for the main window",
+  "windows": ["main"],
+  "webviews": ["select-surface", "select-audio-device"],
+  "permissions": [
+    "core:app:default",
+    "core:window:default",
+    "core:menu:default",
+    "core:event:default",
+    "core:image:default",
+    "core:path:default",
+    "core:tray:default",
+    "core:webview:default",
+
+    "core:window:allow-start-dragging",
+    "core:window:allow-close",
+    "core:window:allow-destroy",
+    "core:window:allow-minimize",
+
+    "core:event:allow-emit",
+    "core:event:allow-emit-to",
+    "core:event:allow-listen",
+    "core:event:allow-unlisten",
+
+    "shell:allow-open",
+    
+    "cli:default"
+  ]
+}

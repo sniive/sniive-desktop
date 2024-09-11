@@ -1,0 +1,37 @@
+[package]
+name = "Sniive"
+version = "0.2.0"
+description = "Sniive"
+authors = ["Sniive"]
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[lib]
+name = "sniive_lib"
+crate-type = ["lib", "cdylib", "staticlib"]
+
+[build-dependencies]
+tauri-build = { version = "2.0.0-rc", features = [] }
+
+[dependencies]
+tauri = { version = "2.0.0-rc", features = [] }
+tauri-plugin-shell = "2.0.0-rc"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+static_cell = "2.1.0"
+crabgrab = { version = "0.4.0", features = ["bitmap", "screenshot"] }
+futures = "0.3.30"
+image = "0.24.4"
+png = "0.17.13"
+rbase64 = "2.0.3"
+rayon = "1.7.0"
+rdev = { version = "0.5.3", features = ["serialize"] }
+cpal = "0.15.2"
+hound = "3.5.1"
+tokio = "1.40.0"
+tauri-plugin-single-instance = "2.0.0-rc.1"
+tauri-plugin-cli = "2.0.0-rc.1"
+regex = "1.10.6"
+reqwest = "0.12.7"
+tauri-plugin-deep-link = "2.0.0-rc"
