@@ -39,11 +39,11 @@ pub fn serialize_result(
         result
             .start_time
             .elapsed()?
-            .as_micros(),
+            .as_millis(),
         result
             .end_time
             .elapsed()?
-            .as_micros()
+            .as_millis()
     );
 
     // convert data to a json string

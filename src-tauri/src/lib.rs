@@ -42,7 +42,7 @@ pub fn run() {
             can_run_audio: Mutex::new(async_ta2ac_tx),
             audio_device: Mutex::new(None),
 
-            auth: Mutex::new(None),
+            auth: Mutex::new(utils::match_deep_link("sniive://test/fr?access=test")),
             recording_start_time: Mutex::new(None),
             recording_end_time: Mutex::new(None),
         })

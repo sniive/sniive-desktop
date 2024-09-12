@@ -12,7 +12,7 @@ pub async fn finish_recording(handle: AppHandle) -> Result<bool, String> {
     let filepath = tmp_path.join("output.wav");
     let upload_link = utils::get_upload_link(&handle, "wav").await.map_err(|x| x.to_string())?;
         
-    let mut file = std::fs::File::open(filepath).map_err(|x| x.to_string())?;
+    let mut file = std::fs::File::open(filepath.clone()).map_err(|x| x.to_string())?;
     let mut file_contents = Vec::new();
     file.read_to_end(&mut file_contents).map_err(|x| x.to_string())?;
     
@@ -29,6 +29,9 @@ pub async fn finish_recording(handle: AppHandle) -> Result<bool, String> {
     if !res.status().is_success() {
         return Ok(false);
     }
+
+    // delete the file
+    std::fs::remove_file(filepath).map_err(|x| x.to_string())?;
 
     let domain = match tauri::is_dev() {
         true => "http://localhost:3000",

@@ -5,6 +5,8 @@ use tokio::sync::mpsc::Receiver;
 
 use crate::{app::app_state::AppState, utils};
 
+use super::convert_audio::convert_audio;
+
 pub async fn audio_controller(
     app_handle: &AppHandle,
     mut async_receiver: Receiver<bool>,
@@ -86,21 +88,21 @@ pub async fn audio_controller(
         };
 
         stream.play()?;
-
         while let Some(can_run) = futures::executor::block_on(async_receiver.recv()) {
             if !can_run {
                 break;
             }
         }
-
-
-
         drop(stream);
+
+
         writer
             .lock()
             .unwrap()
             .take()
             .unwrap()
             .finalize()?;
+
+        convert_audio(&filepath, &spec)?;
     }
 }
