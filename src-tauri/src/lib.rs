@@ -9,6 +9,7 @@ use input::{
 use serde_json::Value;
 use static_cell::StaticCell;
 use tauri_plugin_cli::CliExt;
+use tauri_plugin_updater::UpdaterExt;
 use upload::upload_controller::upload_controller;
 use utils::match_deep_link;
 use std::sync::atomic::AtomicBool;
@@ -56,10 +57,14 @@ pub fn run() {
             finish_recording
         ])
         .setup(|app| {
+            let handle = app.handle().clone();
+            tauri::async_runtime::spawn(async move { app_update_handler(handle).await });
+
             let app_handle: &'static tauri::AppHandle = APP_HANDLE.init(app.handle().clone());
             async_runtime::spawn(async move { upload_controller(app_handle, async_ic2uc_rx).await.unwrap() });
             async_runtime::spawn(async move { input_controller(app_handle, async_il2ic_rx, async_ic2uc_tx).await.unwrap() });
             async_runtime::spawn(async move { audio_controller(app_handle, async_ta2ac_rx).await.unwrap() });
+
 
             app_cli_handler(app_handle);
 
@@ -113,3 +118,22 @@ fn app_single_instance_handler(app: &tauri::AppHandle, args: Vec<String>, _cwd: 
         *auth = matched;
     }
 }
+
+async fn app_update_handler(app: tauri::AppHandle) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
+    if let Some(update) = app.updater()?.check().await? {
+      let mut downloaded = 0;
+  
+      // alternatively we could also call update.download() and update.install() separately
+      update.download_and_install(|chunk_length, content_length| {
+        downloaded += chunk_length;
+        println!("downloaded {downloaded} from {content_length:?}");
+      }, || {
+        println!("download finished");
+      }).await?;
+  
+      println!("update installed");
+      app.restart();
+    }
+  
+    Ok(())
+  }

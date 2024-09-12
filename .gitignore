@@ -11,7 +11,13 @@ node_modules
 dist
 dist-ssr
 *.local
+
+# Super secret files
 *.secret
+*.key
+*.pem
+*.pub
+
 
 # Editor directories and files
 .vscode/*
