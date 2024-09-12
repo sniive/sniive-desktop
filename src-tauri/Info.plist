@@ -2,7 +2,28 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+  <key>NSCameraUsageDescription</key>
+  <string>This app requires camera access to record the screen.</string>
+
   <key>NSMicrophoneUsageDescription</key>
-  <string>Request microphone access for recording</string>
+  <string>This app requires microphone access to record audio during screen recording.</string>
+
+  <key>NSAppTransportSecurity</key>
+  <dict>
+      <key>NSExceptionDomains</key>
+      <dict>
+          <key>sniive.com</key>
+          <dict>
+              <key>NSIncludesSubdomains</key>
+              <true/>
+              <key>NSExceptionAllowsInsecureHTTPLoads</key>
+              <false/>
+              <key>NSExceptionRequiresForwardSecrecy</key>
+              <true/>
+              <key>NSExceptionMinimumTLSVersion</key>
+              <string>TLSv1.2</string>
+          </dict>
+      </dict>
+  </dict>
 </dict>
 </plist>

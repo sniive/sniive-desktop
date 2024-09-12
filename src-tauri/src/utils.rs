@@ -146,7 +146,7 @@ pub async fn get_upload_link(
         true => "http://localhost:3000",
         false => "https://sniive.com",
     };
-    
+
     let auth = app_handle
         .try_state::<AppState>()
         .ok_or("Failed to get AppState")?
@@ -156,11 +156,7 @@ pub async fn get_upload_link(
         .clone()
         .ok_or("No auth")?;
 
-    let url = format!(
-        "{}/api/spaces/{}/populate",
-        domain,
-        auth.space_name
-    );
+    let url = format!("{}/api/spaces/{}/populate", domain, auth.space_name);
     let body = serde_json::json!({ "access": auth.access, "fileExtension": file_extension });
     let client = reqwest::Client::new();
     let res = client
@@ -171,4 +167,52 @@ pub async fn get_upload_link(
         .await?;
     let res_json = res.json::<String>().await?;
     Ok(res_json)
+}
+
+/*
+export async function notifyRecordingStatus({
+  spaceName,
+  access,
+  status
+}: Auth & { status: 'start' | 'stop' }): Promise<NotifyRecordingStatusResponse> {
+  return await fetch(`${domain}/api/spaces/${spaceName}/notify-recording-status`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ access, status })
+  })
+*/
+
+pub async fn notify_recording_status(
+    app_handle: &AppHandle,
+    status: &str,
+) -> Result<bool, Box<dyn std::error::Error + Send + Sync>> {
+    let domain = match tauri::is_dev() {
+        true => "http://localhost:3000",
+        false => "https://sniive.com",
+    };
+
+    let auth = app_handle
+        .try_state::<AppState>()
+        .ok_or("Failed to get AppState")?
+        .auth
+        .lock()
+        .await
+        .clone()
+        .ok_or("No auth")?;
+
+    let url = format!(
+        "{}/api/spaces/{}/notify-recording-status",
+        domain, auth.space_name
+    );
+    let body = serde_json::json!({ "access": auth.access, "status": status });
+    let client = reqwest::Client::new();
+    let res = client
+        .post(&url)
+        .header("Content-Type", "application/json")
+        .body(body.to_string())
+        .send()
+        .await?;
+    Ok(res.status().is_success())
 }
