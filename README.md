@@ -1,7 +1,11 @@
-# Tauri + React + Typescript
+# Sniive
 
-This template should help get you started developing with Tauri, React and Typescript in Vite.
+The desktop client seamlessly integrated with the Sniive web services.
+It is written in Tauri (Rust + ReactJS), and it is a cross-platform application.
 
-## Recommended IDE Setup
-
-- [VS Code](https://code.visualstudio.com/) + [Tauri](https://marketplace.visualstudio.com/items?itemName=tauri-apps.tauri-vscode) + [rust-analyzer](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer)
+## Features
+- [x] Record clicks and keystrokes on a global level
+- [x] Discard events not within the active window / display
+- [x] Record audio from the microphone
+- [x] Send the data to the Sniive web services
+- [x] Use a custom URL scheme to open the client from the web app

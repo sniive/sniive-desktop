@@ -17,6 +17,7 @@ dist-ssr
 *.key
 *.pem
 *.pub
+*.env
 
 
 # Editor directories and files

@@ -1,0 +1,11 @@
+{
+  "version": "0.2.0",
+  "notes": "",
+  "pub_date": "2024-09-13T08:08:21.186Z",
+  "platforms": {
+    "windows-x86_64": {
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUVWNPWnJ4TGp1M3VjaDI3Q2Vzd0Qzdk1Vb3orTitBNCtBRTVkMkxGZlZRWEpaY1EzWnBlbWpzZzA3Skl4SUtTYWt1bWtBbDZ4WldtS0xQUmQrMXNDQ3p5d1k0NmRYR3c0PQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzI2MjEzODQ0CWZpbGU6U25paXZlXzAuMi4wX3g2NC1zZXR1cC5leGUKdEJzRkQrU0ROaGZFYnNoUm04ZVFmWWNoZjE1TFdDeWdwcURBUEh5M1k3MGpVZ0pWY3NDUTJqemxrVlI0MHVCelFmdHZlaExPQnJiQTl2R2RLUTNVQmc9PQo=",
+      "url": "https://github.com/sniive/sniive-desktop/releases/download/v0.2.0/Sniive_0.2.0_x64-setup.exe"
+    }
+  }
+}
