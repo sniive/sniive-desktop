@@ -58,7 +58,9 @@ pub fn run() {
         ])
         .setup(|app| {
             let handle = app.handle().clone();
-            tauri::async_runtime::spawn(async move { app_update_handler(handle).await });
+            if handle.plugin(tauri_plugin_updater::Builder::new().build()).is_ok() {
+                tauri::async_runtime::spawn(async move { app_update_handler(handle).await.unwrap() });
+            }
 
             let app_handle: &'static tauri::AppHandle = APP_HANDLE.init(app.handle().clone());
             async_runtime::spawn(async move { upload_controller(app_handle, async_ic2uc_rx).await.unwrap() });

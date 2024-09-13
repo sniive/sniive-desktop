@@ -8,5 +8,5 @@ pub async fn is_auth(handle: AppHandle) -> Result<bool, String> {
         .try_state::<AppState>()
         .ok_or("Failed to get AppState")?;
     let auth_guard = state.auth.lock().await;
-    Ok(auth_guard.is_some() || tauri::is_dev())
+    Ok(auth_guard.is_some())
 }

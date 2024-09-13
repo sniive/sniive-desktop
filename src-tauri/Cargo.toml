@@ -1,6 +1,6 @@
 [package]
 name = "Sniive"
-version = "0.2.0"
+version = "0.1.0"
 description = "Sniive"
 authors = ["Sniive"]
 edition = "2021"
@@ -25,7 +25,6 @@ futures = "0.3.30"
 image = "0.24.4"
 png = "0.17.13"
 rbase64 = "2.0.3"
-rayon = "1.7.0"
 rdev = { version = "0.5.3", features = ["serialize"] }
 cpal = "0.15.2"
 hound = "3.5.1"
