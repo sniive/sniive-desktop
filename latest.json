@@ -1,11 +1,11 @@
 {
-  "version": "0.2.1",
+  "version": "0.1.0",
   "notes": "",
-  "pub_date": "2024-09-13T08:42:23.508Z",
+  "pub_date": "2024-09-13T09:23:57.581Z",
   "platforms": {
     "windows-x86_64": {
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUVWNPWnJ4TGp1M2tpVk9Uak9FcGZaWndvdE5hcm1MaTBWdE5HUlBsVUx5UkhxN2tIdXl2QzJxL3NPRVc5OFo1a3ZmczFnOGdXaTV1SFR0bmYvQ01yemh5ajNoZHQycXdNPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzI2MjE2Nzk5CWZpbGU6U25paXZlXzAuMi4xX3g2NC1zZXR1cC5leGUKRVo4ZDlaeGwzUElLUTBQRGxySTRuUjhvQmwwTzBzUkg2ekxoL2prMUlsUkJHVjd5SVRjOVZSWHB6ako0NTRoTFZiVFAyenMvanhYZm1GSVJ2VUVNQWc9PQo=",
-      "url": "https://github.com/sniive/sniive-desktop/releases/download/v0.2.1/Sniive_0.2.1_x64-setup.exe"
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUVWNPWnJ4TGp1M3NCTDZwRVJxZlZDQVhrd0pFK2JCWTFINnFzV3ltaEh3MEtlcFE0TG1GUEgvSWdSWkI4U2RuTWxRZG0wMFpHczBJN0w5OC9rVnlrTmtXUHI4a09iTHdzPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzI2MjE5Mzg1CWZpbGU6U25paXZlXzAuMS4wX3g2NC1zZXR1cC5leGUKRlByN0V4bEVON0xNUHJ6eFhGVk10bjNFVEtaQTlkWiszS29FcjJQK0ZOWjVVV3pjeUVndXYvOGVpUUFsVEN6ZGFCbXdqTXlSVW5SL0x2VXUvamNYQ0E9PQo=",
+      "url": "https://github.com/sniive/sniive-desktop/releases/download/v0.1.0/Sniive_0.1.0_x64-setup.exe"
     }
   }
 }

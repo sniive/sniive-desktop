@@ -11,7 +11,8 @@
     "prepare": "husky",
     "format": "prettier . --write",
     "lint-staged": "lint-staged",
-    "release": "cd ./node_modules/tauri-action && pnpm i && pnpm run build && cd ../../ && node --env-file=./release.env ./node_modules/tauri-action/dist/index.js"
+    "postinstall": "cd ./node_modules/tauri-action && pnpm i && pnpm run build",
+    "release": "node --env-file=./release.env ./node_modules/tauri-action/dist/index.js"
   },
   "lint-staged": {
     "*.{jsx,ts,tsx}": [
