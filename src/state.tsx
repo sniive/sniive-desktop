@@ -22,7 +22,7 @@ export const useAppStore = create<AppStore>((set, get) => ({
   isRecording: false,
   audioDevice: null,
   surface: null,
-  locale: "fr",
+  locale: "en",
   setInputSourcesDisabled: (disabled) =>
     set({ inputSourcesDisabled: disabled }),
   setRecordButtonDisabled: (disabled) =>

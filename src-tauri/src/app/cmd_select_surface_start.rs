@@ -1,16 +1,18 @@
 use std::time::Duration;
 
-use crabgrab::{
-    platform::windows::WindowsCapturableWindowExt,
-    prelude::{
-        take_screenshot, CapturableContent, CapturableContentFilter, CaptureConfig,
-        CapturePixelFormat, CaptureStream, FrameBitmap, VideoFrameBitmap,
-    },
+use crabgrab::prelude::{
+    take_screenshot, CapturableContent, CapturableContentFilter, CaptureConfig,
+    CapturePixelFormat, CaptureStream, FrameBitmap, VideoFrameBitmap,
 };
 use futures::future::join_all;
 use serde::{Deserialize, Serialize};
 use tauri::{AppHandle, Manager};
 use tokio::time::timeout;
+
+#[cfg(target_os = "windows")]
+use crabgrab::platform::windows::WindowsCapturableWindowExt;
+#[cfg(target_os = "macos")]
+use crabgrab::platform::macos::MacosCapturableWindowExt;
 
 use crate::utils;
 
@@ -71,7 +73,11 @@ pub async fn select_surface_start(handle: &AppHandle) -> Result<Vec<Option<Surfa
                 && window.application().pid() != self_pid
         })
         .for_each(|window| {
+            #[cfg(target_os = "macos")]
+            let id = window.get_window_id() as isize;
+            #[cfg(target_os = "windows")]
             let id = window.get_window_handle().0;
+            
             let title = window.title();
             let program = window.application().identifier();
             if let Ok(config) = CaptureConfig::with_window(window, CapturePixelFormat::Bgra8888) {

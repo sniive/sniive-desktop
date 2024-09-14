@@ -44,13 +44,16 @@ pub async fn select_surface(handle: AppHandle) -> Result<SurfaceOutputResult, St
     .always_on_top(true)
     .closable(true)
     .minimizable(true)
+    .maximizable(false)
     .resizable(true)
     .inner_size(600.0, 180.0)
     .decorations(false)
     .focused(true)
-    .transparent(true)
     .visible(false)
     .title("Select Surface");
+
+    #[cfg(target_os = "windows")]
+    select_surface_builder.transparent(true);
 
     let select_surface_window = select_surface_builder.build().map_err(|e| e.to_string())?;
     let surfaces: Vec<Surface> = thumbnails

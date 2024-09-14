@@ -40,11 +40,11 @@ pub async fn select_audio(handle: AppHandle) -> Result<AudioOutputResult, String
     .always_on_top(true)
     .closable(true)
     .minimizable(true)
+    .maximizable(false)
     .resizable(true)
     .inner_size(500.0, 140.0)
     .decorations(false)
     .focused(true)
-    .transparent(true)
     .visible(false)
     .title("Select Audio Device");
 

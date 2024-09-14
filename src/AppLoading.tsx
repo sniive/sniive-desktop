@@ -1,24 +1,35 @@
-import { RiCloseLine, RiSubtractLine } from "@remixicon/react";
+import { RiCloseLine, RiLoader4Fill, RiSubtractLine } from "@remixicon/react";
 import { getCurrentWindow } from "@tauri-apps/api/window";
-import { open } from "@tauri-apps/plugin-shell";
-import { Button } from "@/components/ui/button";
-import { useAppStore } from "./state";
-import { getText } from "./lib/locales";
-import { useEffect } from "react";
+import { useError } from "@/lib/utils";
+import { useAppStore } from "@/state";
+import { useEffect, useRef } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { useNavigate } from "react-router-dom";
+import { getCurrent } from "@tauri-apps/plugin-deep-link";
 
-function AppError() {
-  const url = new URL(window.location.href);
-  const error: string = url.searchParams.get("error") ?? "Unknown error";
-  const { locale, setLocale } = useAppStore(({ locale, setLocale }) => ({
-    locale,
-    setLocale,
-  }));
+export function AppLoading() {
+  const error = useError();
   const navigate = useNavigate();
+  const { setLocale } = useAppStore(({ setLocale }) => ({ setLocale }));
+  const checks = useRef<number>(0);
 
   useEffect(() => {
+    getCurrent()
+      .then(async (urls) => {
+        if (urls) {
+          await invoke<void>("set_auth", { urls }).catch(error);
+        }
+      })
+      .catch(error);
+
+    // every 100ms, check if the user is auth, for a max of 3s
     const interval = setInterval(async () => {
+      if (checks.current >= 30) {
+        error("Not authenticated");
+        clearInterval(interval);
+        return;
+      }
+
       await invoke<boolean>("is_auth")
         .then(async (res) => {
           if (res) {
@@ -29,9 +40,11 @@ function AppError() {
           }
         })
         .catch(() => {
-          console.error("Something went wrong");
+          error("Something went wrong");
         });
-    }, 1000);
+
+      checks.current++;
+    }, 100);
   }, []);
 
   return (
@@ -41,15 +54,7 @@ function AppError() {
         data-tauri-drag-region
       >
         <div
-          className="flex flex-row items-center justify-center col-span-4 col-start-2 truncate"
-          data-tauri-drag-region
-        >
-          <span className="font-bold" data-tauri-drag-region>
-            {getText(locale, "error")}
-          </span>
-        </div>
-        <div
-          className="flex flex-row items-center justify-end gap-2 col-span-1 col-start-6 pr-2"
+          className="flex flex-row items-center justify-end gap-2 col-start-6 col-span-1 pr-2"
           data-tauri-drag-region
         >
           <button
@@ -70,20 +75,10 @@ function AppError() {
       </header>
 
       <div className="w-full flex-1 relative flex flex-col items-center justify-center pb-1">
-        <span className="text-sm truncate">
-          <pre>{error}</pre>
-        </span>
-        <Button
-          variant="link"
-          size="sm"
-          className="mt-0 py-0.5 h-auto"
-          onClick={() => open("https://sniive.com")}
-        >
-          https://sniive.com
-        </Button>
+        <RiLoader4Fill className="animate-spin h-10 w-10 text-primary" />
       </div>
     </main>
   );
 }
 
-export default AppError;
+export default AppLoading;

@@ -1,8 +1,10 @@
-use crabgrab::{
-    platform::windows::WindowsCapturableWindowExt,
-    prelude::{CapturableContent, CapturableContentFilter},
-};
+use crabgrab::prelude::{CapturableContent, CapturableContentFilter};
 use tauri::{AppHandle, Manager};
+
+#[cfg(target_os = "windows")]
+use crabgrab::platform::windows::WindowsCapturableWindowExt;
+#[cfg(target_os = "macos")]
+use crabgrab::platform::macos::MacosCapturableWindowExt;
 
 use crate::utils::display_id;
 
@@ -35,10 +37,17 @@ pub async fn select_surface_close(
                 .map_err(|_| "Failed to get capturable content")?;
             match surface_type {
                 SurfaceType::Window => {
+                    #[cfg(target_os = "windows")]
                     let window = content
                         .windows()
                         .find(|window| window.get_window_handle().0 == surface_id)
                         .ok_or("Window not found")?;
+                    #[cfg(target_os = "macos")]
+                    let window = content
+                        .windows()
+                        .find(|window| window.get_window_id() as isize == surface_id)
+                        .ok_or("Window not found")?;
+                    
                     let mut capturable_surface = state.capturable_surface.lock().await;
                     *capturable_surface = Some(CapturableSurface::CapturableWindow(window));
                     return Ok(());

@@ -4,35 +4,8 @@ import { VideoInputSource } from "@/components/videoInputSource";
 import { RiCloseLine, RiSubtractLine } from "@remixicon/react";
 import { getCurrentWindow } from "@tauri-apps/api/window";
 import sniive from "@/assets/sniive.svg";
-import { useEffect } from "react";
-import { invoke } from "@tauri-apps/api/core";
-import { useError } from "./lib/utils";
-import { useAppStore } from "./state";
 
 function AppMain() {
-  const error = useError();
-  const { setLocale } = useAppStore(({ setLocale }) => ({ setLocale }));
-
-  useEffect(() => {
-    invoke<boolean>("is_auth")
-      .then((res) => {
-        if (!res) {
-          error("Not authenticated");
-        }
-      })
-      .catch(() => {
-        error("Something went wrong");
-      });
-
-    invoke<string>("get_locale")
-      .then((locale) => {
-        setLocale(locale);
-      })
-      .catch(() => {
-        error("Failed to get locale");
-      });
-  }, []);
-
   return (
     <main className="bg-background w-scren h-screen antialiased rounded-lg flex flex-col items-center overflow-hidden font-sans select-none">
       <header

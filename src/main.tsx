@@ -7,10 +7,15 @@ import AppSelectSurface from "./AppSelectSurface";
 import AppSelectAudioDevice from "./AppSelectAudioDevice";
 import AppError from "./AppError";
 import { AppResult } from "./AppResult";
+import AppLoading from "./AppLoading";
 
 const router = createBrowserRouter([
   {
     path: "/",
+    element: <AppLoading />,
+  },
+  {
+    path: "/main",
     element: <AppMain />,
   },
   {

@@ -1,13 +1,18 @@
 use std::time::Duration;
 use active_win_pos_rs::get_active_window;
 use crabgrab::{
-    frame::VideoFrame, platform::windows::WindowsCapturableWindowExt, prelude::{take_screenshot, CaptureConfig, CapturePixelFormat}
+    frame::VideoFrame,  prelude::{take_screenshot, CaptureConfig, CapturePixelFormat}
 };
 use tauri::{AppHandle, Manager};
 use tokio::{
     sync::mpsc::{Receiver, Sender},
     time::timeout,
 };
+
+#[cfg(target_os = "windows")]
+use crabgrab::platform::windows::WindowsCapturableWindowExt;
+#[cfg(target_os = "macos")]
+use crabgrab::platform::macos::MacosCapturableWindowExt;
 
 use crate::{
     app::app_state::{AppState, CapturableSurface},
@@ -46,7 +51,11 @@ pub async fn input_controller(
             CapturableSurface::CapturableWindow(window) => {
                 match get_active_window() {
                     Ok(active_window) => {
+                        #[cfg(target_os = "windows")]
                         let formatted_id = format!("HWND({:?})", window.get_window_handle().0);
+                        #[cfg(target_os = "macos")]
+                        let formatted_id = format!("{:?}", window.get_window_id());
+                        
                         if active_window.window_id != formatted_id {
                             continue;
                         }
