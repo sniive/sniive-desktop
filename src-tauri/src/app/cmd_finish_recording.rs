@@ -8,7 +8,7 @@ use super::app_state::AppState;
 
 #[tauri::command]
 pub async fn finish_recording(handle: AppHandle) -> Result<bool, String> {
-    let tmp_path = handle.path().app_local_data_dir().map_err(|x| x.to_string())?;
+    let tmp_path = handle.path().app_cache_dir().map_err(|x| x.to_string())?;
     let filepath = tmp_path.join("output.wav");
     let upload_link = utils::get_upload_link(&handle, "wav").await.map_err(|x| x.to_string())?;
         
@@ -29,14 +29,7 @@ pub async fn finish_recording(handle: AppHandle) -> Result<bool, String> {
     if !res.status().is_success() {
         return Ok(false);
     }
-
-    // delete the file
     std::fs::remove_file(filepath).map_err(|x| x.to_string())?;
-
-    let domain = match tauri::is_dev() {
-        true => "http://localhost:3000",
-        false => "https://sniive.com",
-    };
 
     let state = handle
         .try_state::<AppState>()
@@ -47,8 +40,7 @@ pub async fn finish_recording(handle: AppHandle) -> Result<bool, String> {
     let recording_end_time = state.recording_end_time.lock().await.ok_or("No recording end time")?;
 
     let url = format!(
-        "{}/api/spaces/{}/run-tutorial",
-        domain,
+        "https://sniive.com/api/spaces/{}/run-tutorial",
         auth.space_name
     );
 
@@ -57,7 +49,7 @@ pub async fn finish_recording(handle: AppHandle) -> Result<bool, String> {
         "metadata": {
             "recordingStartTime": recording_start_time.duration_since(std::time::UNIX_EPOCH).map_err(|x| x.to_string())?.as_millis(),
             "recordingEndTime": recording_end_time.duration_since(std::time::UNIX_EPOCH).map_err(|x| x.to_string())?.as_millis(),
-            "platform": std::env::consts::OS,
+            "platform": "windows",
         }
     });
 

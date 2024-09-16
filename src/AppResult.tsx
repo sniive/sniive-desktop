@@ -4,10 +4,13 @@ import { invoke } from "@tauri-apps/api/core";
 import { useState } from "react";
 import { useAppStore } from "./state";
 import { getText } from "./lib/locales";
+import { useNavigate } from "react-router-dom";
 
 export function AppResult() {
   const [loading, setLoading] = useState<boolean>(false);
   const [success, setSuccess] = useState<boolean>(false);
+
+  const navigate = useNavigate();
 
   const { locale } = useAppStore(({ locale }) => ({ locale }));
 
@@ -30,7 +33,18 @@ export function AppResult() {
   };
 
   const handleCancel = async () => {
-    await getCurrentWindow().close();
+    setLoading(true);
+    invoke<boolean>("cancel_recording")
+      .then(async (res) => {
+        if (!res) {
+          setLoading(false);
+          return;
+        }
+        navigate("/main");
+      })
+      .catch(() => {
+        setLoading(false);
+      });
   };
 
   return (

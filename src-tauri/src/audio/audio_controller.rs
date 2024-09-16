@@ -11,8 +11,13 @@ pub async fn audio_controller(
     app_handle: &AppHandle,
     mut async_receiver: Receiver<bool>,
 ) -> Result<(), Box<dyn std::error::Error + Send + Sync>> {
-    let tmp_path = app_handle.path().app_local_data_dir()?;
+    let tmp_path = app_handle.path().app_cache_dir()?;
     let filepath = tmp_path.join("output.wav");
+
+    // if file exists, delete it
+    if filepath.exists() {
+        std::fs::remove_file(&filepath)?;
+    }
 
     loop {
         while let Some(can_run) = async_receiver.recv().await {

@@ -1,5 +1,5 @@
 use app::{
-    app_state::AppState, cmd_finish_recording::finish_recording, cmd_get_locale::get_locale, cmd_is_auth::is_auth, cmd_select_audio::select_audio, cmd_select_surface::select_surface, cmd_set_auth::set_auth, cmd_start_input::start_input, cmd_stop_input::stop_input
+    app_state::AppState, cmd_cancel_recording::cancel_recording, cmd_finish_recording::finish_recording, cmd_get_locale::get_locale, cmd_is_auth::is_auth, cmd_select_audio::select_audio, cmd_select_surface::select_surface, cmd_set_auth::set_auth, cmd_start_input::start_input, cmd_stop_input::stop_input
 };
 use audio::audio_controller::audio_controller;
 use input::{
@@ -7,15 +7,16 @@ use input::{
     input_loop::input_loop,
     state_machine::InputEvent,
 };
-use serde_json::Value;
 use static_cell::StaticCell;
 use std::sync::atomic::AtomicBool;
 use tauri::{async_runtime, Listener, Manager};
-use tauri_plugin_cli::CliExt;
 use tauri_plugin_updater::UpdaterExt;
+use tauri_plugin_fs::FsExt;
 use tokio::sync::{mpsc, Mutex};
 use upload::upload_controller::upload_controller;
 use utils::match_deep_link;
+use serde_json::Value;
+use tauri_plugin_cli::CliExt;
 
 mod app;
 mod audio;
@@ -33,6 +34,7 @@ pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_deep_link::init())
         .plugin(tauri_plugin_cli::init())
+        .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_single_instance::init(
             app_single_instance_handler,
         ))
@@ -59,7 +61,8 @@ pub fn run() {
             set_auth,
             is_auth,
             get_locale,
-            finish_recording
+            finish_recording,
+            cancel_recording
         ])
         .setup(|app| {
             let app_handle: &'static tauri::AppHandle = APP_HANDLE.init(app.handle().clone());
@@ -67,6 +70,7 @@ pub fn run() {
                 app_deep_link_handler(app_handle, url.payload());
             });
             app_cli_handler(app_handle);
+            app_files_handler(app_handle);
 
             if app_handle
                 .plugin(tauri_plugin_updater::Builder::new().build())
@@ -141,8 +145,6 @@ fn app_single_instance_handler(app: &tauri::AppHandle, args: Vec<String>, _cwd: 
         .set_focus()
         .expect("Can't Bring Window to Focus");
 
-    println!("args: {:?}", args);
-
     if args.len() > 1 {
         let arg = &args[1];
         let matched = match_deep_link(arg);
@@ -166,17 +168,22 @@ async fn app_update_handler(
             .download_and_install(
                 |chunk_length, content_length| {
                     downloaded += chunk_length;
-                    println!("downloaded {downloaded} from {content_length:?}");
+                    eprintln!("downloaded {downloaded} from {content_length:?}");
                 },
                 || {
-                    println!("download finished");
+                    eprintln!("download finished");
                 },
-            )
-            .await?;
+            ).await?;
 
-        println!("update installed");
+        eprintln!("update installed");
         app.restart();
     }
 
     Ok(())
+}
+
+fn app_files_handler(app_handle: &tauri::AppHandle) {
+    let scope = app_handle.fs_scope();
+    let tmp_path = app_handle.path().app_cache_dir().expect("Failed to get cache dir");
+    scope.allow_directory(tmp_path, false);
 }

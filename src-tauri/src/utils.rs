@@ -142,11 +142,6 @@ pub async fn get_upload_link(
     app_handle: &AppHandle,
     file_extension: &str,
 ) -> Result<String, Box<dyn std::error::Error + Send + Sync>> {
-    let domain = match tauri::is_dev() {
-        true => "http://localhost:3000",
-        false => "https://sniive.com",
-    };
-
     let auth = app_handle
         .try_state::<AppState>()
         .ok_or("Failed to get AppState")?
@@ -156,7 +151,7 @@ pub async fn get_upload_link(
         .clone()
         .ok_or("No auth")?;
 
-    let url = format!("{}/api/spaces/{}/populate", domain, auth.space_name);
+    let url = format!("https://sniive.com/api/spaces/{}/populate", auth.space_name);
     let body = serde_json::json!({ "access": auth.access, "fileExtension": file_extension });
     let client = reqwest::Client::new();
     let res = client
@@ -188,11 +183,6 @@ pub async fn notify_recording_status(
     app_handle: &AppHandle,
     status: &str,
 ) -> Result<bool, Box<dyn std::error::Error + Send + Sync>> {
-    let domain = match tauri::is_dev() {
-        true => "http://localhost:3000",
-        false => "https://sniive.com",
-    };
-
     let auth = app_handle
         .try_state::<AppState>()
         .ok_or("Failed to get AppState")?
@@ -203,8 +193,8 @@ pub async fn notify_recording_status(
         .ok_or("No auth")?;
 
     let url = format!(
-        "{}/api/spaces/{}/notify-recording-status",
-        domain, auth.space_name
+        "https://sniive.com/api/spaces/{}/notify-recording-status",
+        auth.space_name
     );
     let body = serde_json::json!({ "access": auth.access, "status": status });
     let client = reqwest::Client::new();

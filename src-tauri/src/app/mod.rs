@@ -17,3 +17,4 @@ pub mod cmd_is_auth;
 pub mod cmd_get_locale;
 
 pub mod cmd_finish_recording;
+pub mod cmd_cancel_recording;
