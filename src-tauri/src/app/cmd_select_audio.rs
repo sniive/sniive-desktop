@@ -48,7 +48,11 @@ pub async fn select_audio(handle: AppHandle) -> Result<AudioOutputResult, String
     .visible(false)
     .title("Select Audio Device");
 
+    #[cfg(target_os = "windows")]
+    let select_audio_window = select_audio_builder.transparent(true).build().map_err(|e| e.to_string())?;
+    #[cfg(target_os = "macos")]
     let select_audio_window = select_audio_builder.build().map_err(|e| e.to_string())?;
+
     let audio_devices = devices
         .iter()
         .enumerate()

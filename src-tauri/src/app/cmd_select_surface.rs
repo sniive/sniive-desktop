@@ -53,9 +53,10 @@ pub async fn select_surface(handle: AppHandle) -> Result<SurfaceOutputResult, St
     .title("Select Surface");
 
     #[cfg(target_os = "windows")]
-    select_surface_builder.transparent(true);
-
+    let select_surface_window = select_surface_builder.transparent(true).build().map_err(|e| e.to_string())?;
+    #[cfg(target_os = "macos")]
     let select_surface_window = select_surface_builder.build().map_err(|e| e.to_string())?;
+
     let surfaces: Vec<Surface> = thumbnails
         .into_iter()
         .filter_map(|thumbnail| thumbnail)
