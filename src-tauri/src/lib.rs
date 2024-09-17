@@ -8,6 +8,7 @@ use input::{
     state_machine::InputEvent,
 };
 use static_cell::StaticCell;
+use tauri_plugin_dialog::DialogExt;
 use std::sync::atomic::AtomicBool;
 use tauri::{async_runtime, Listener, Manager};
 use tauri_plugin_updater::UpdaterExt;
@@ -83,15 +84,40 @@ pub fn run() {
             }
 
             async_runtime::spawn(async move {
-                upload_controller(app_handle, async_ic2uc_rx).await.unwrap()
+                upload_controller(app_handle, async_ic2uc_rx)
+                .await
+                .map_err(|e| {
+                    app_handle
+                    .dialog()
+                    .message(format!("Upload error: {:?}", e))
+                    .kind(tauri_plugin_dialog::MessageDialogKind::Error)
+                    .title("Error")
+                    .blocking_show();
+                })
             });
             async_runtime::spawn(async move {
                 input_controller(app_handle, async_il2ic_rx, async_ic2uc_tx)
                     .await
-                    .unwrap()
+                    .map_err(|e| {
+                        app_handle
+                        .dialog()
+                        .message(format!("Input error: {:?}", e))
+                        .kind(tauri_plugin_dialog::MessageDialogKind::Error)
+                        .title("Error")
+                        .blocking_show();
+                    })
             });
             async_runtime::spawn(async move {
-                audio_controller(app_handle, async_ta2ac_rx).await.unwrap()
+                audio_controller(app_handle, async_ta2ac_rx)
+                .await
+                .map_err(|e| {
+                    app_handle
+                    .dialog()
+                    .message(format!("Audio error: {:?}", e))
+                    .kind(tauri_plugin_dialog::MessageDialogKind::Error)
+                    .title("Error")
+                    .blocking_show();
+                })
             });
 
             async_runtime::spawn_blocking(move || {
