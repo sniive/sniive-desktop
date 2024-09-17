@@ -50,7 +50,7 @@ pub fn make_scaled_base64_png_from_bitmap<Data: BitmapDataBgra8x4>(
     max_width: usize,
     max_height: usize,
 ) -> Result<String, String> {
-    let (mut height, mut width) = (bitmap.width, bitmap.height);
+    let (mut height, mut width) = (bitmap.height, bitmap.width);
     if width > max_width {
         width = max_width;
         height = ((max_width as f64 / bitmap.width as f64) * bitmap.height as f64).ceil() as usize;

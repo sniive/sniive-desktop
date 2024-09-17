@@ -49,7 +49,8 @@ pub async fn finish_recording(handle: AppHandle) -> Result<bool, String> {
         "metadata": {
             "recordingStartTime": recording_start_time.duration_since(std::time::UNIX_EPOCH).map_err(|x| x.to_string())?.as_millis(),
             "recordingEndTime": recording_end_time.duration_since(std::time::UNIX_EPOCH).map_err(|x| x.to_string())?.as_millis(),
-            "platform": "windows",
+            "platform": std::env::consts::OS,
+            "version": env!("CARGO_PKG_VERSION"),
         }
     });
 
