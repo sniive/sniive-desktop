@@ -195,11 +195,11 @@ pub fn serialize_result(
         events.join(","),
         result
             .start_time
-            .elapsed()?
+            .duration_since(std::time::UNIX_EPOCH)?
             .as_millis(),
         result
             .end_time
-            .elapsed()?
+            .duration_since(std::time::UNIX_EPOCH)?
             .as_millis()
     );
 
