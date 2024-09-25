@@ -102,7 +102,7 @@ function AppSelectSurface() {
                       }
                     >
                       <img
-                        src={`data:image/png;base64,${thumbnail}`}
+                        src={`data:image/jpeg;base64,${thumbnail}`}
                         alt={title}
                         className="col-span-2 rounded-md max-h-20 m-auto"
                       />
@@ -139,7 +139,7 @@ function AppSelectSurface() {
                       }
                     >
                       <img
-                        src={`data:image/png;base64,${thumbnail}`}
+                        src={`data:jpeg/png;base64,${thumbnail}`}
                         alt={title}
                         className="col-span-2 rounded-md m-auto max-h-20"
                       />

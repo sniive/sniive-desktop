@@ -24,7 +24,7 @@ pub async fn upload_controller(
         };
 
         let image_base64 =
-            utils::make_scaled_base64_png_from_bitmap(image_bitmap_bgra8888, 1920, 1080)?;
+            utils::make_base64_jpeg_from_bitmap(&image_bitmap_bgra8888)?;
 
         let result_string = serialize_result(&events, &image_base64)?;
         let upload_link = utils::get_upload_link(app_handle, "json").await?;

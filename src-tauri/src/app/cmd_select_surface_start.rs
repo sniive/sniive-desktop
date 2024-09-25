@@ -126,10 +126,8 @@ pub async fn select_surface_start(handle: &AppHandle) -> Result<Vec<Option<Surfa
                     _ => return None,
                 };
 
-                let image_base64 = match utils::make_scaled_base64_png_from_bitmap(
-                    image_bitmap_bgra8888,
-                    600,
-                    480,
+                let image_base64 = match utils::make_base64_jpeg_from_bitmap(
+                    &image_bitmap_bgra8888,
                 ) {
                     Ok(image_base64) => image_base64,
                     _ => return None,
