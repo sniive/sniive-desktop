@@ -24,10 +24,10 @@ pub async fn upload_controller(
         };
 
         let image_base64 =
-            utils::make_scaled_base64_png_from_bitmap(image_bitmap_bgra8888, 1920, 1080)?;
+            utils::make_base64_jpeg_from_bitmap(&image_bitmap_bgra8888)?;
 
         let result_string = serialize_result(&events, &image_base64)?;
-        let upload_link = utils::get_upload_link(app_handle, "json").await?;
+        let upload_link = utils::get_upload_link(app_handle, "json").await.map_err(|_| utils::show_error_dialog(app_handle, "Trouble connecting to client"))?;
 
         let client = reqwest::Client::new();
         let res = client
@@ -36,7 +36,8 @@ pub async fn upload_controller(
             .header("x-ms-blob-type", "BlockBlob")
             .body(result_string)
             .send()
-            .await?;
+            .await
+            .map_err(|_| utils::show_error_dialog(app_handle, "Failed to parse response"))?;
 
         if !res.status().is_success() {
             eprintln!("Failed to upload data: {:?}", res);

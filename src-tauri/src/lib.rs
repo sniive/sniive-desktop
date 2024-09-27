@@ -27,8 +27,8 @@ mod utils;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    let (async_ic2uc_tx, async_ic2uc_rx) = mpsc::channel::<ToUploadEvent>(1);
-    let (async_il2ic_tx, async_il2ic_rx) = mpsc::channel::<InputEvent>(1);
+    let (async_ic2uc_tx, async_ic2uc_rx) = mpsc::channel::<ToUploadEvent>(8);
+    let (async_il2ic_tx, async_il2ic_rx) = mpsc::channel::<InputEvent>(8);
     let (async_ta2ac_tx, async_ta2ac_rx) = mpsc::channel::<bool>(1);
     static APP_HANDLE: StaticCell<tauri::AppHandle> = StaticCell::new();
 
@@ -79,7 +79,7 @@ pub fn run() {
             {
                 let handle = app_handle.clone();
                 tauri::async_runtime::spawn(
-                    async move { app_update_handler(handle).await.unwrap() },
+                    async move { app_update_handler(handle).await },
                 );
             }
 

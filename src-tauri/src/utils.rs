@@ -3,15 +3,25 @@ use std::{
     io::BufWriter,
     sync::{Arc, Mutex},
 };
-
 use cpal::{FromSample, Sample};
 use crabgrab::{
     prelude::{BitmapDataBgra8x4, CapturableDisplay, FrameBitmapBgraUnorm8x4},
     util::Rect,
 };
 use tauri::{AppHandle, Event, Listener, Manager, WebviewWindow};
+use tauri_plugin_dialog::{DialogExt, MessageDialogKind};
 
 use crate::app::app_state::{AppState, Auth};
+
+pub fn show_error_dialog(app_handle: &AppHandle, message: &str) -> Box<dyn std::error::Error + Send + Sync> {
+    app_handle.dialog()
+        .message(message)
+        .title("Error")
+        .kind(MessageDialogKind::Error)
+        .blocking_show();
+
+    message.into()
+}
 
 pub async fn wait_for_event(window: &WebviewWindow, event_name: String) -> Option<Event> {
     let (blocker_tx, mut blocker_rx) = tokio::sync::mpsc::unbounded_channel::<Event>();
@@ -45,60 +55,36 @@ pub fn display_id(display: &CapturableDisplay) -> isize {
     xored as isize
 }
 
-pub fn make_scaled_base64_png_from_bitmap<Data: BitmapDataBgra8x4>(
-    bitmap: FrameBitmapBgraUnorm8x4<Data>,
-    max_width: usize,
-    max_height: usize,
-) -> Result<String, String> {
-    let (mut height, mut width) = (bitmap.height, bitmap.width);
-    if width > max_width {
-        width = max_width;
-        height = ((max_width as f64 / bitmap.width as f64) * bitmap.height as f64).ceil() as usize;
-    };
 
-    if height > max_height {
-        height = max_height;
-        width = ((max_height as f64 / bitmap.height as f64) * bitmap.width as f64).ceil() as usize;
-    };
-
-    let mut write_vec = vec![0u8; 0];
-    {
-        let mut encoder = png::Encoder::new(&mut write_vec, width as u32, height as u32);
-        encoder.set_color(png::ColorType::Rgba);
-        encoder.set_depth(png::BitDepth::Eight);
-        encoder.set_source_gamma(png::ScaledFloat::from_scaled(45455)); // 1.0 / 2.2, scaled by 100000
-        encoder.set_source_gamma(png::ScaledFloat::new(1.0 / 2.2)); // 1.0 / 2.2, unscaled, but rounded
-        let source_chromaticities = png::SourceChromaticities::new(
-            // Using unscaled instantiation here
-            (0.31270, 0.32900),
-            (0.64000, 0.33000),
-            (0.30000, 0.60000),
-            (0.15000, 0.06000),
-        );
-        encoder.set_source_chromaticities(source_chromaticities);
-        let mut writer = match encoder.write_header() {
-            Ok(writer) => writer,
-            Err(error) => return Err(format!("Error: {:?}", error)),
-        };
-        let mut image_data = vec![0u8; width * height * 4];
-        for y in 0..height {
-            let sample_y = (bitmap.height * y) / height;
-            for x in 0..width {
-                let sample_x = (bitmap.width * x) / width;
-                let [b, g, r, a]: [u8; 4] =
-                    bitmap.data.as_ref()[sample_x + sample_y * bitmap.width];
-                image_data[(x + y * width) * 4 + 0] = r;
-                image_data[(x + y * width) * 4 + 1] = g;
-                image_data[(x + y * width) * 4 + 2] = b;
-                image_data[(x + y * width) * 4 + 3] = a;
-            }
-        }
-        match writer.write_image_data(&image_data) {
-            Ok(()) => (),
-            Err(error) => return Err(format!("Error: {:?}", error)),
-        }
+fn flatten(vec: &[[u8; 4]]) -> Vec<u8> {
+    let total_size = vec.len() * 4;
+    let mut flattened = Vec::with_capacity(total_size);
+    unsafe {
+        flattened.set_len(total_size);
     }
-    Ok(rbase64::encode(write_vec.as_slice()))
+    for (i, chunk) in vec.into_iter().enumerate() {
+        let offset = i * 4;
+        flattened[offset..offset + 4].copy_from_slice(chunk);
+    }
+    flattened
+}
+
+pub fn make_base64_jpeg_from_bitmap<Data: BitmapDataBgra8x4>(
+    bitmap: &FrameBitmapBgraUnorm8x4<Data>,
+) -> Result<String, String> {
+    // convert BGRA to RGB
+    let flat_data = flatten(bitmap.data.as_ref());
+    let image = turbojpeg::Image { 
+        pixels: flat_data.as_slice(),
+        width: bitmap.width,
+        height: bitmap.height, 
+        // size of one image row in bytes
+        pitch: bitmap.width * 4,
+        format: turbojpeg::PixelFormat::BGRX 
+    };
+    let jpeg_data = turbojpeg::compress(image, 95, turbojpeg::Subsamp::Sub2x2).map_err(|e| e.to_string())?;
+    let base64_image = rbase64::encode(&jpeg_data);
+    Ok(base64_image)
 }
 
 type WavWriterHandle = Arc<Mutex<Option<hound::WavWriter<BufWriter<File>>>>>;
@@ -159,25 +145,12 @@ pub async fn get_upload_link(
         .header("Content-Type", "application/json")
         .body(body.to_string())
         .send()
-        .await?;
-    let res_json = res.json::<String>().await?;
-    Ok(res_json)
+        .await
+        .map_err(|_| show_error_dialog(app_handle, "Trouble connecting to client"))?;
+    let json_result = res.json::<String>().await.map_err(|_| show_error_dialog(app_handle, "Failed to parse response"))?;
+    Ok(json_result)
 }
 
-/*
-export async function notifyRecordingStatus({
-  spaceName,
-  access,
-  status
-}: Auth & { status: 'start' | 'stop' }): Promise<NotifyRecordingStatusResponse> {
-  return await fetch(`${domain}/api/spaces/${spaceName}/notify-recording-status`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({ access, status })
-  })
-*/
 
 pub async fn notify_recording_status(
     app_handle: &AppHandle,
@@ -203,6 +176,7 @@ pub async fn notify_recording_status(
         .header("Content-Type", "application/json")
         .body(body.to_string())
         .send()
-        .await?;
+        .await
+        .map_err(|_| show_error_dialog(app_handle, "Trouble connecting to client"))?;
     Ok(res.status().is_success())
 }

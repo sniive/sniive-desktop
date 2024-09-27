@@ -1,6 +1,6 @@
 {
   "productName": "Sniive",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "identifier": "com.sniive.app",
   "build": {
     "beforeDevCommand": "pnpm dev",

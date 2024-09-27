@@ -2,7 +2,7 @@ use rdev::listen;
 use tauri::{AppHandle, Manager};
 use tokio::sync::mpsc::Sender;
 
-use crate::app::app_state::AppState;
+use crate::{app::app_state::AppState, utils};
 
 use super::state_machine::{InputEvent, MousePosition};
 
@@ -39,7 +39,7 @@ pub fn input_loop(app_handle: &AppHandle, async_sender: Sender<InputEvent>) {
                             event: event.event_type,
                             mouse_position,
                         };
-                        async_sender.blocking_send(input_event).unwrap();
+                        async_sender.blocking_send(input_event).map_err(|_| utils::show_error_dialog(&app_handle, "Not enough time to process inputs")).unwrap();
                     }
                 }
             }
