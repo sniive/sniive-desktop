@@ -9,8 +9,19 @@ use crabgrab::{
     util::Rect,
 };
 use tauri::{AppHandle, Event, Listener, Manager, WebviewWindow};
+use tauri_plugin_dialog::{DialogExt, MessageDialogKind};
 
 use crate::app::app_state::{AppState, Auth};
+
+pub fn show_error_dialog(app_handle: &AppHandle, message: &str) -> Box<dyn std::error::Error + Send + Sync> {
+    app_handle.dialog()
+        .message(message)
+        .title("Error")
+        .kind(MessageDialogKind::Error)
+        .blocking_show();
+
+    message.into()
+}
 
 pub async fn wait_for_event(window: &WebviewWindow, event_name: String) -> Option<Event> {
     let (blocker_tx, mut blocker_rx) = tokio::sync::mpsc::unbounded_channel::<Event>();
@@ -134,25 +145,12 @@ pub async fn get_upload_link(
         .header("Content-Type", "application/json")
         .body(body.to_string())
         .send()
-        .await?;
-    let res_json = res.json::<String>().await?;
-    Ok(res_json)
+        .await
+        .map_err(|_| show_error_dialog(app_handle, "Trouble connecting to client"))?;
+    let json_result = res.json::<String>().await.map_err(|_| show_error_dialog(app_handle, "Failed to parse response"))?;
+    Ok(json_result)
 }
 
-/*
-export async function notifyRecordingStatus({
-  spaceName,
-  access,
-  status
-}: Auth & { status: 'start' | 'stop' }): Promise<NotifyRecordingStatusResponse> {
-  return await fetch(`${domain}/api/spaces/${spaceName}/notify-recording-status`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({ access, status })
-  })
-*/
 
 pub async fn notify_recording_status(
     app_handle: &AppHandle,
@@ -178,6 +176,7 @@ pub async fn notify_recording_status(
         .header("Content-Type", "application/json")
         .body(body.to_string())
         .send()
-        .await?;
+        .await
+        .map_err(|_| show_error_dialog(app_handle, "Trouble connecting to client"))?;
     Ok(res.status().is_success())
 }
