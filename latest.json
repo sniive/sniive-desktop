@@ -1,11 +1,19 @@
 {
   "version": "0.1.2",
   "notes": "",
-  "pub_date": "2024-10-08T10:06:03.813Z",
+  "pub_date": "2024-10-08T10:13:58.022Z",
   "platforms": {
     "windows-x86_64": {
       "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUVWNPWnJ4TGp1M2pNMmdYMHhaVUg2OG5heXp3d2ptNkc3WFU2UXJRZDY4dzA0YlpXWmJwcFFQUzlmaVFtampzckVhWDl0V01QN1RhNXF5R0NKRjdtOWtNVThRcGF4aHcwPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzI4MzgxOTQ5CWZpbGU6U25paXZlXzAuMS4yX3g2NC1zZXR1cC5leGUKNUpZUkVCRHBDNGwvRmJraG52cXk1dDZiUlNWRGRUWEFRUWc2bVBPNTBhNmIwWVJYYXVKSXBQQXg5TDYwbndtYUt4QmJIQ1RZM1FKWkt6MkxCOXp5Qnc9PQo=",
       "url": "https://github.com/sniive/sniive-desktop/releases/download/v0.1.2/Sniive_0.1.2_x64-setup.exe"
+    },
+    "darwin-aarch64": {
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUVWNPWnJ4TGp1M2pHZjlsVlFsS0I3UGFzSEpTbzlka3Z5TThMa3NnYk5HblZGK1FNanJibUlJVE5wemhPQzZJMkxXUTNURitDMEI4OHhta05xaDZNSUZGbUhTTXRDdVFRPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzI4MzgyNDI2CWZpbGU6U25paXZlLmFwcC50YXIuZ3oKS0RjVjFmYk1XbU9EckN6cEdlWGdZUERWYWtmazVhcm5xbFFiUEx1Nlc2c0RiUVBWK0ZlckYyaG1hS1QyRUt0N0I0Nm4wTXN3UUFXTGdlTlNTTU96RGc9PQo=",
+      "url": "https://github.com/sniive/sniive-desktop/releases/download/v0.1.2/Sniive_universal.app.tar.gz"
+    },
+    "darwin-x86_64": {
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUVWNPWnJ4TGp1M2pHZjlsVlFsS0I3UGFzSEpTbzlka3Z5TThMa3NnYk5HblZGK1FNanJibUlJVE5wemhPQzZJMkxXUTNURitDMEI4OHhta05xaDZNSUZGbUhTTXRDdVFRPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzI4MzgyNDI2CWZpbGU6U25paXZlLmFwcC50YXIuZ3oKS0RjVjFmYk1XbU9EckN6cEdlWGdZUERWYWtmazVhcm5xbFFiUEx1Nlc2c0RiUVBWK0ZlckYyaG1hS1QyRUt0N0I0Nm4wTXN3UUFXTGdlTlNTTU96RGc9PQo=",
+      "url": "https://github.com/sniive/sniive-desktop/releases/download/v0.1.2/Sniive_universal.app.tar.gz"
     }
   }
 }
