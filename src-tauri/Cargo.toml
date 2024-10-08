@@ -1,6 +1,6 @@
 [package]
 name = "Sniive"
-version = "0.1.1"
+version = "0.1.2"
 description = "Sniive"
 authors = ["Sniive"]
 edition = "2021"
@@ -40,3 +40,4 @@ active-win-pos-rs = "0.8.3"
 wavers = "1.4.3"
 circular-queue = "0.2.6"
 turbojpeg = { version = "1.1.1", features = ["image"] }
+sys-locale = "0.3.1"

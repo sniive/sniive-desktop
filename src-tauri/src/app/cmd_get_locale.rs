@@ -10,6 +10,6 @@ pub async fn get_locale(handle: AppHandle) -> Result<String, String> {
     let auth_guard = state.auth.lock().await;
     match auth_guard.as_ref() {
         Some(auth) => Ok(auth.locale.clone()),
-        None => Ok("en".to_string()),
+        None => Ok(sys_locale::get_locale().unwrap_or_else(|| String::from("en-US")).split('-').next().unwrap_or("en").to_string()),
     }
 }

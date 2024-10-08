@@ -21,9 +21,9 @@ function AppError() {
     const interval = setInterval(async () => {
       await invoke<boolean>("is_auth")
         .then(async (res) => {
+          const locale = await invoke<string>("get_locale");
+          setLocale(locale);
           if (res) {
-            const locale = await invoke<string>("get_locale");
-            setLocale(locale);
             navigate("/main");
             clearInterval(interval);
           }
@@ -68,20 +68,36 @@ function AppError() {
           </button>
         </div>
       </header>
-
-      <div className="w-full flex-1 relative flex flex-col items-center justify-center pb-1">
-        <span className="text-sm truncate">
-          <pre>{error}</pre>
-        </span>
-        <Button
-          variant="link"
-          size="sm"
-          className="mt-0 py-0.5 h-auto"
-          onClick={() => open("https://sniive.com")}
-        >
-          https://sniive.com
-        </Button>
-      </div>
+      {error === "not_authenticated" ? (
+        <div className="w-full flex-1 relative flex flex-row items-center justify-center pb-1 px-4">
+          <span className="text-sm leading-tight text-center">
+            {getText(locale, "notAuthenticatedErrorFirst")}{" "}
+            <Button
+              variant="link"
+              size="sm"
+              className="mt-0 py-0 px-0 h-auto"
+              onClick={() => open("https://sniive.com")}
+            >
+              sniive.com
+            </Button>{" "}
+            {getText(locale, "notAuthenticatedErrorSecond")}
+          </span>
+        </div>
+      ) : (
+        <div className="w-full flex-1 relative flex flex-col items-center justify-center pb-1 px-4">
+          <span className="text-sm truncate leading-tight">
+            <pre>{error}</pre>
+          </span>
+          <Button
+            variant="link"
+            size="sm"
+            className="mt-0 py-0.5 h-auto"
+            onClick={() => open("https://sniive.com")}
+          >
+            https://sniive.com
+          </Button>
+        </div>
+      )}
     </main>
   );
 }

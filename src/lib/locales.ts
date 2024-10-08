@@ -13,7 +13,9 @@ type TextsKeys =
   | "selectionMics"
   | "selectionWindows"
   | "selectionDisplays"
-  | "selectionEmpty";
+  | "selectionEmpty"
+  | "notAuthenticatedErrorFirst"
+  | "notAuthenticatedErrorSecond";
 
 const TEXTS_EN: Record<TextsKeys, string> = {
   audioInputUnknown: "Unknown source",
@@ -31,6 +33,8 @@ const TEXTS_EN: Record<TextsKeys, string> = {
   selectionWindows: "Windows",
   selectionDisplays: "Displays",
   selectionEmpty: "No items",
+  notAuthenticatedErrorFirst: "Open Sniive via",
+  notAuthenticatedErrorSecond: "to start capturing.",
 };
 
 const TEXTS_FR: Record<TextsKeys, string> = {
@@ -49,6 +53,8 @@ const TEXTS_FR: Record<TextsKeys, string> = {
   selectionWindows: "Fenêtres",
   selectionDisplays: "Écrans",
   selectionEmpty: "Aucun élément",
+  notAuthenticatedErrorFirst: "Ouvrez Sniive via",
+  notAuthenticatedErrorSecond: "pour démarrer la capture.",
 };
 
 export function getText(locale: string | undefined, key: TextsKeys): string {

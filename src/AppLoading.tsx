@@ -20,21 +20,21 @@ export function AppLoading() {
           await invoke<void>("set_auth", { urls }).catch(error);
         }
       })
-      .catch(error);
+      .catch(() => false);
 
     // every 100ms, check if the user is auth, for a max of 3s
     const interval = setInterval(async () => {
       if (checks.current >= 30) {
-        error("Not authenticated");
+        error("not_authenticated");
         clearInterval(interval);
         return;
       }
 
       await invoke<boolean>("is_auth")
         .then(async (res) => {
+          const locale = await invoke<string>("get_locale");
+          setLocale(locale);
           if (res) {
-            const locale = await invoke<string>("get_locale");
-            setLocale(locale);
             navigate("/main");
             clearInterval(interval);
           }
